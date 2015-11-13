@@ -1,0 +1,110 @@
+\documentclass[pdftex,10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[francais]{babel}
+\usepackage{hyperref}
+\usepackage{eurosym}
+\usepackage[a4paper]{geometry}
+\usepackage{graphicx}
+
+\geometry{hscale=0.75,vscale=0.80,centering}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+
+\includegraphics[width=0.45\textwidth]{./sceau-a-quadri.jpg}\\[1cm]
+
+\textsc{\LARGE Université Libre de Bruxelles}\\[1.5cm]
+\textsc{\Large INFO-F-403\\ Introduction to language theory and compiling}\\[1.5cm]
+
+\HRule \\[0.4cm]
+{ \huge \bfseries Assignement 1 : The scanner\\[0.4cm] }
+
+\HRule \\[1.5cm]
+
+\center{Maxime \textsc{Desclefs} - 362626}
+\center{Julian \textsc{Schembri} - 380446}
+
+\vfill
+{\large 2015 - 2016}
+
+\end{center}
+\end{titlepage}
+
+\newpage
+
+\section{Introduction}
+
+Dans le cadre du cours d'introduction à la théorie du langage et de compilation (INFO-F-403), il a été demandé d'implémenter et d'écrire un compilateur pour le langage SUPRALGOL$^{2016}$, une variante du langage Algol68.\\\\ La première partie consiste en la création du scanner. Ce scanner analyse et découpe le code en différents tokens différenciant chacun des éléments du langage.
+
+
+\section{Tokens}
+
+Voici le tableau qui reprend l'ensemble des tokens du langage Supralgol. Chaque ligne de celui-ci est composée du nom du token, le type dans l'enum LexicalUnit qui lui est associé et de l'expression régulière qui correspond à ce token.\\
+
+\begin{tabular}{|l|c|r|}
+  \hline
+  Nom & Type & Expression régulière \\
+  \hline
+  Comment & - & \begin{minipage}{2in} \begin{verbatim} co.*co \end{verbatim} \end{minipage} \\
+  LeftParenthesis (() & LEFT\_PARENTHESIS & \begin{minipage}{2in} \begin{verbatim} ( \end{verbatim} \end{minipage} \\
+  RightParenthesis ()) & RIGHT\_PARENTHESIS & \begin{minipage}{2in} \begin{verbatim} ) \end{verbatim} \end{minipage} \\
+
+  Beg & BEGIN & \begin{minipage}{2in} \begin{verbatim} begin \end{verbatim} \end{minipage} \\
+  End & END & \begin{minipage}{2in} \begin{verbatim} end \end{verbatim} \end{minipage} \\
+
+  Semicolon (;) & SEMICOLON & \begin{minipage}{2in} \begin{verbatim} ; \end{verbatim} \end{minipage} \\
+  Assign (:=) & ASSING & \begin{minipage}{2in} \begin{verbatim} := \end{verbatim} \end{minipage} \\
+
+  Minus (-) & MINUS & \begin{minipage}{2in} \begin{verbatim} - \end{verbatim} \end{minipage} \\
+  Plus (+) & PLUS & \begin{minipage}{2in} \begin{verbatim} + \end{verbatim} \end{minipage} \\
+  Times (*) & TIMES & \begin{minipage}{2in} \begin{verbatim} * \end{verbatim} \end{minipage} \\
+  Divide (/) & DIVIDE & \begin{minipage}{2in} \begin{verbatim} / \end{verbatim} \end{minipage} \\
+
+
+  If & IF & \begin{minipage}{2in} \begin{verbatim} if \end{verbatim} \end{minipage} \\
+  Then & THEN & \begin{minipage}{2in} \begin{verbatim} then \end{verbatim} \end{minipage} \\
+  Fi & FI & \begin{minipage}{2in} \begin{verbatim} fi \end{verbatim} \end{minipage} \\
+  Else & ELSE & \begin{minipage}{2in} \begin{verbatim} else \end{verbatim} \end{minipage} \\
+  Not & NOT & \begin{minipage}{2in} \begin{verbatim} not \end{verbatim} \end{minipage} \\
+
+  Or & OR & \begin{minipage}{2in} \begin{verbatim} or \end{verbatim} \end{minipage} \\
+  And & AND & \begin{minipage}{2in} \begin{verbatim} and \end{verbatim} \end{minipage} \\
+
+  Equal (=) & EQUAL & \begin{minipage}{2in} \begin{verbatim} = \end{verbatim} \end{minipage} \\
+  GreaterEqual ($\geq$) & GREATER\_EQUAL & \begin{minipage}{2in} \begin{verbatim} >= \end{verbatim} \end{minipage} \\
+  Greater ($\textgreater$) & GREATER & \begin{minipage}{2in} \begin{verbatim} > \end{verbatim} \end{minipage} \\
+  SmallerEqual ($\leq$) & SMALLER\_EQUAL & \begin{minipage}{2in} \begin{verbatim} <= \end{verbatim} \end{minipage} \\
+  Smaller ($\textless$) & SMALLER & \begin{minipage}{2in} \begin{verbatim} < \end{verbatim} \end{minipage} \\
+  Different ($\ne$) & DIFFERENT & \begin{minipage}{2in} \begin{verbatim} != \end{verbatim} \end{minipage} \\
+
+  While & WHILE & \begin{minipage}{2in} \begin{verbatim} while \end{verbatim} \end{minipage} \\
+  Do & DO & \begin{minipage}{2in} \begin{verbatim} do \end{verbatim} \end{minipage} \\
+  Od & OD & \begin{minipage}{2in} \begin{verbatim} od \end{verbatim} \end{minipage} \\
+  For & FOR & \begin{minipage}{2in} \begin{verbatim} for \end{verbatim} \end{minipage} \\
+  From & FROM & \begin{minipage}{2in} \begin{verbatim} from \end{verbatim} \end{minipage} \\
+  By & BY & \begin{minipage}{2in} \begin{verbatim} by \end{verbatim} \end{minipage} \\
+  To & TO & \begin{minipage}{2in} \begin{verbatim} to \end{verbatim} \end{minipage} \\
+
+  Print & PRINT & \begin{minipage}{2in} \begin{verbatim} print \end{verbatim} \end{minipage} \\
+  Read & READ & \begin{minipage}{2in} \begin{verbatim} read \end{verbatim} \end{minipage} \\
+
+  Number & NUMBER & \begin{minipage}{2in} \begin{verbatim} {[0-9]}* \end{verbatim} \end{minipage} \\
+  VarName & VARNAME & \begin{minipage}{2in} \begin{verbatim} {{[A-Z]}|{[a-z]}}{{{[A-Z]}|{[a-z]}}|{[0-9]}}* \end{verbatim} \end{minipage} \\
+
+
+\hline
+\end{tabular}
+
+\section{Implémentation}
+
+\subsection{Mauvaise variable}
+Pour éviter les cas où des noms de variables commencent par un numéro, un type \textit{BadVarName} a été implémenté pour retourner une erreur lorsque le cas se produit. 
+
+\subsection{Compilation et exécution}
+Pour lancer le projet, il faut d'abord lancer l'exécutable \textit{/more/compile.sh} qui se chargera de créer un .jar rendant l'exécution compatible avec la machine. 
+
+\end{document}
