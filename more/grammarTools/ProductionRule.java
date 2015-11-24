@@ -22,11 +22,11 @@ public class ProductionRule {
 	}
 	
 	public int getRulesNumber(){
-		return rulesNumber;
+		return this.rulesNumber;
 	}
 	
 	public Variable getLeftSide(){
-		return leftSide;
+		return this.leftSide;
 	}
 	
 	public void setLeftSide(Variable leftSide){
@@ -34,16 +34,16 @@ public class ProductionRule {
 	}
 	
 	public ArrayList<Token> getRightSide(){
-		return rightSide;
+		return this.rightSide;
 	}
 	
 	public void setRightSide(ArrayList<Token> rightSide){
 		this.rightSide = rightSide;
-		rulesNumber = rightSide.size();
+		this.rulesNumber = rightSide.size();
 	}
 
 	public void addToken(Token Token){
 		this.rightSide.add(Token);
-		++rulesNumber;
+		++this.rulesNumber;
 	}
 }

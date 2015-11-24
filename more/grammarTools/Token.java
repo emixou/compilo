@@ -9,7 +9,7 @@ public abstract class Token {
 	}
 	
 	public String getValue() {
-		return value;
+		return this.value;
 	}
 
 	public void setValue(String value) {
