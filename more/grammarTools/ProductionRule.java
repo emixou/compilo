@@ -46,4 +46,17 @@ public class ProductionRule {
 		this.rightSide.add(Token);
 		++this.rulesNumber;
 	}
+
+	public boolean isLeftRecursive() {
+		return this.getLeftSide().equals(this.getRightSide().get(0));
+	}
+	
+	public void repr() {
+		System.out.print(this.getLeftSide().getValue()+" -> ");
+		for (Token aToken : this.getRightSide() ) {
+			System.out.print(aToken.getValue()+" ");
+		}
+		System.out.println();
+		
+	}
 }

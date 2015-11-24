@@ -17,7 +17,6 @@ public abstract class Token {
 	}
 	
 	public boolean equals(Object aToken){
-		System.out.println(this.value+" "+((Token) aToken).value+" "+this.value.equals(((Token) aToken).value));
 		return this.value.equals(((Token) aToken).value);
 	}
 	

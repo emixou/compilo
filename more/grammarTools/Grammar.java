@@ -155,11 +155,7 @@ public class Grammar {
 		
 		System.out.println("Production Rules :");
 		for (ProductionRule aProductionRule : this.productionRules) {
-			System.out.print(aProductionRule.getLeftSide().getValue()+" -> ");
-			for (Token aToken : aProductionRule.getRightSide() ) {
-				System.out.print(aToken.getValue()+" ");
-			}
-			System.out.println();
+			aProductionRule.repr();
 		}
 		
 		System.out.println("Startsymbol :");
