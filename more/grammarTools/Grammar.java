@@ -55,6 +55,17 @@ public class Grammar {
 		return null;
 	}
 	
+	
+	public ProductionRule getProductionRule(Token rightSide){
+		for(ProductionRule rule : this.productionRules){
+			if(rule.getRightSide().equals(rightSide)){
+				return rule;
+			}
+		}
+		return null;
+	}
+	
+	
 	public void setStartSymbol(Variable startSymbol){
 		this.startSymbol = startSymbol;
 	}
