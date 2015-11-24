@@ -26,7 +26,7 @@ public class Main {
             } while(symbol.getType() != LexicalUnit.END_OF_STREAM);
             System.out.println("Identifiers");
 
-            HashMap<Object, Integer> varNameMap = scanner.getVarNameMap();
+            HashMap<Object, Integer> varNameMap = LexicalAnalyzer.getVarNameMap();
             TreeSet<Object> keys = new TreeSet<Object>(varNameMap.keySet());
             Iterator<Object> it = keys.iterator();
             while (it.hasNext()) {

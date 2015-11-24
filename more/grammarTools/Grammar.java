@@ -1,6 +1,13 @@
 package grammarTools;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import grammarTools.Token;
+import grammarTools.Terminal;
+import grammarTools.Variable;;
+
 
 public class Grammar {
 
@@ -13,6 +20,55 @@ public class Grammar {
 		this.terminals = new ArrayList<Terminal>();
 		this.variables = new ArrayList<Variable>();
 		this.productionRules = new ArrayList<ProductionRule>();
+	}
+ 
+	public Grammar(String fileName) {
+	    try {
+	    	BufferedReader reader = new BufferedReader(new FileReader(fileName));
+	    	String line;
+	    	productionRules = new ArrayList<ProductionRule>();
+	    	terminals = new ArrayList<Terminal>();
+	    	variables = new ArrayList<Variable>();
+	    	
+			while ((line = reader.readLine()) != null) {
+				String splitLine[] = line.split("->");
+				String leftSide = splitLine[0].trim();
+				String rightSide[] = splitLine[1].trim().split("\\s\\|\\s");
+				
+				
+				for (String expr : rightSide) {
+					ArrayList<Token> rightSideTokens = new ArrayList<Token>();
+					
+					for (String token : expr.split("\\s")) {
+						token = token.trim();
+						if (token.startsWith("<") && token.endsWith(">")) {
+							Variable aVariable = new Variable(token);
+							rightSideTokens.add(aVariable);
+							if (!variables.contains(aVariable)) {
+								variables.add(aVariable);
+							}
+						} else {
+							Terminal aTerminal = new Terminal(token);
+							rightSideTokens.add(aTerminal);
+							if (!terminals.contains(aTerminal)) {
+								terminals.add(aTerminal);
+							}
+						}
+						
+					}
+					productionRules.add(new ProductionRule(new Variable(leftSide),rightSideTokens));
+				}
+				
+			}
+			startSymbol = productionRules.get(0).getLeftSide();
+			
+			reader.close();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    
 	}
 	
 	public Grammar(ArrayList<Terminal> terminals, ArrayList<Variable> variables, ArrayList<ProductionRule> productionRules, Variable startSymbol){
@@ -69,6 +125,34 @@ public class Grammar {
 		else
 			return false;
 		
+	}
+	
+	public void repr() {
+		System.out.println("Terminals :");
+		System.out.print('[');
+		for (Terminal aTerminal : this.terminals) {
+			System.out.print(aTerminal.getValue()+", ");
+		}
+		System.out.println(']');
+		
+		System.out.println("Variables :");
+		System.out.print('[');
+		for (Variable aVariable : this.variables) {
+			System.out.print(aVariable.getValue()+", ");
+		}
+		System.out.println(']');
+		
+		System.out.println("Production Rules :");
+		for (ProductionRule aProductionRule : this.productionRules) {
+			System.out.print(aProductionRule.getLeftSide().getValue()+" -> ");
+			for (Token aToken : aProductionRule.getRightSide() ) {
+				System.out.print(aToken.getValue()+" ");
+			}
+			System.out.println();
+		}
+		
+		System.out.println("Startsymbol :");
+		System.out.println(this.startSymbol.getValue());
 	}
 	
 }
