@@ -20,7 +20,7 @@ public class UselessSymbol implements Algorithm{
 		
 	}
 	
-	public void removeUnreachableSymbol(){
+	public void removeUnreachableSymbols(){
 		ArrayList<Variable> reachableSymbols = new ArrayList<Variable>();
 		
 		//First grammar symbol is reachable.
@@ -31,12 +31,13 @@ public class UselessSymbol implements Algorithm{
 			for(Token rightSideToken : rule.getRightSide()){
 				if(grammar.isTerminal(rightSideToken)){
 					//If it's a terminal, we can reach it
+					reachableSymbols.add((Variable) rightSideToken);
 				}
 			}
 		}
 	}
 	
-	public void removeUnproductiveSymbol(){
+	public void removeUnproductiveSymbols(){
 		
 	}
 

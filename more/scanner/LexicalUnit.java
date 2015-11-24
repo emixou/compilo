@@ -1,3 +1,4 @@
+package scanner;
 public enum LexicalUnit{
     VARNAME,
     NUMBER,
