@@ -27,29 +27,30 @@ public class UselessSymbol implements Algorithm{
 		//First grammar symbol is reachable.
 		reachableSymbols.add(grammar.getStartSymbol());
 		
-		for(Variable symbol : reachableSymbols){
-			ProductionRule rule = grammar.getProductionRule(symbol);
-			for(Token rightSideToken : rule.getRightSide()){
-				//if(grammar.isTerminal(rightSideToken)){
-					//If it's a terminal, we can reach it
-				reachableSymbols.add((Variable) rightSideToken);
-				//}
-			}
-		}
-		
-		for(ProductionRule rule : grammar.getProductionRules()){
-			if(!reachableSymbols.contains(rule.getLeftSide())){
-				grammar.getProductionRules().remove(rule);
-			}else{
-				for(Token rightSideToken : rule.getRightSide()){
-					//if(grammar.isTerminal(rightSideToken)){
-					if(!reachableSymbols.contains(rightSideToken)){
-						grammar.getProductionRules().remove(rule);
+		Boolean hadReachableSymbolsChanged;
+		do{
+			hadReachableSymbolsChanged = false;
+			
+			//A belongs to r(G)
+			for(Variable variable : reachableSymbols){
+
+				//(A -> a) belongs to P
+				for(ProductionRule rule : grammar.getProductionRule(variable)){
+					if(rule.getLeftSide().equals(variable)){
+						for(Token token : rule.getRightSide()){
+							// We only get variable
+							// r(G) U {X | E b,c : a = bXc}
+							if(grammar.isVariable(token)){
+								reachableSymbols.add((Variable) token);
+								hadReachableSymbolsChanged = true;
+							}
+						}
 					}
-					//}
 				}
 			}
-		}
+			
+		}while(hadReachableSymbolsChanged);
+		
 	}
 	
 	public void removeUnproductiveSymbols(){
@@ -57,12 +58,43 @@ public class UselessSymbol implements Algorithm{
 		
 		productiveSymbols.addAll((ArrayList<? extends Token>) grammar.getTerminals());
 		
-		int i=0;
+		Boolean hadProductiveSymbolsChanged;
 		do{
-			ProductionRule rule = grammar.getProductionRule(productiveSymbols.get(i));
+			hadProductiveSymbolsChanged = false;
+			//Token given to get leftside part
 			
-			++i;
-		}while(i < productiveSymbols.size());
+	
+			//a belongs to (g(G))*
+			for(Token token : productiveSymbols){
+
+				//(X -> a) belongs to P
+				for(ProductionRule rule : grammar.getProductionRule(token)){
+					
+					for(Token symbols : rule.getRightSide()){
+						//g(G) U {X}
+						if(!productiveSymbols.contains(token)){
+							productiveSymbols.add(token);
+							hadProductiveSymbolsChanged = true;
+						}
+					}
+					
+				}
+			
+			}
+			
+		}while(hadProductiveSymbolsChanged);
+		
+	}
+	
+	public void removeSymbols(ArrayList<Token> tokenList){
+		
+		//Iterate all production rules
+		for(ProductionRule rule : grammar.getProductionRules()){
+			//If leftpart, delete each rule either rightpart
+			if(!tokenList.contains(rule.getLeftSide()) || !tokenList.contains(rule.getRightSide())){
+				grammar.getProductionRules().remove(rule);
+			}
+		}
 		
 	}
 

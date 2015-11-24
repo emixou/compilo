@@ -102,23 +102,25 @@ public class Grammar {
 		return this.productionRules;
 	}
 	
-	public ProductionRule getProductionRule(Variable leftSide){
+	public ArrayList<ProductionRule> getProductionRule(Variable leftSide){
+		ArrayList<ProductionRule> list = new ArrayList<ProductionRule>();
 		for(ProductionRule rule : this.productionRules){
 			if(rule.getLeftSide().equals(leftSide)){
-				return rule;
+				list.add(rule);
 			}
 		}
-		return null;
+		return list;
 	}
 	
 	
-	public ProductionRule getProductionRule(Token rightSide){
+	public ArrayList<ProductionRule> getProductionRule(Token rightSide){
+		ArrayList<ProductionRule> list = new ArrayList<ProductionRule>();
 		for(ProductionRule rule : this.productionRules){
-			if(rule.getRightSide().equals(rightSide)){
-				return rule;
+			if(rule.getRightSide().contains(rightSide)){
+				list.add(rule);
 			}
 		}
-		return null;
+		return list;
 	}
 	
 	
@@ -136,6 +138,13 @@ public class Grammar {
 		else
 			return false;
 		
+	}
+	
+	public boolean isVariable(Token token) {
+		if(terminals.contains(token))
+			return true;
+		else
+			return false;
 	}
 	
 	public void repr() {
