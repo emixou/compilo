@@ -17,7 +17,8 @@ public class UselessSymbol implements Algorithm{
 	
 	@Override
 	public void execute() {
-		
+		removeUnproductiveSymbols();
+		removeUnreachableSymbols();
 	}
 	
 	public void removeUnreachableSymbols(){
@@ -29,15 +30,39 @@ public class UselessSymbol implements Algorithm{
 		for(Variable symbol : reachableSymbols){
 			ProductionRule rule = grammar.getProductionRule(symbol);
 			for(Token rightSideToken : rule.getRightSide()){
-				if(grammar.isTerminal(rightSideToken)){
+				//if(grammar.isTerminal(rightSideToken)){
 					//If it's a terminal, we can reach it
-					reachableSymbols.add((Variable) rightSideToken);
+				reachableSymbols.add((Variable) rightSideToken);
+				//}
+			}
+		}
+		
+		for(ProductionRule rule : grammar.getProductionRules()){
+			if(!reachableSymbols.contains(rule.getLeftSide())){
+				grammar.getProductionRules().remove(rule);
+			}else{
+				for(Token rightSideToken : rule.getRightSide()){
+					//if(grammar.isTerminal(rightSideToken)){
+					if(!reachableSymbols.contains(rightSideToken)){
+						grammar.getProductionRules().remove(rule);
+					}
+					//}
 				}
 			}
 		}
 	}
 	
 	public void removeUnproductiveSymbols(){
+		ArrayList<Token> productiveSymbols = new ArrayList<Token>();
+		
+		productiveSymbols.addAll((ArrayList<? extends Token>) grammar.getTerminals());
+		
+		int i=0;
+		do{
+			ProductionRule rule = grammar.getProductionRule(productiveSymbols.get(i));
+			
+			++i;
+		}while(i < productiveSymbols.size());
 		
 	}
 
