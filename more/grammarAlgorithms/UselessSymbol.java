@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import grammarTools.Grammar;
 import grammarTools.ProductionRule;
+import grammarTools.Terminal;
 import grammarTools.Token;
 import grammarTools.Variable;
 
@@ -93,6 +94,18 @@ public class UselessSymbol implements Algorithm{
 			//If leftpart, delete each rule either rightpart
 			if(!tokenList.contains(rule.getLeftSide()) || !tokenList.contains(rule.getRightSide())){
 				grammar.getProductionRules().remove(rule);
+			}
+		}
+		
+		for(Terminal terminal : grammar.getTerminals()){
+			if(!tokenList.contains(terminal)){
+				grammar.getTerminals().remove(terminal);
+			}
+		}
+		
+		for(Variable variable : grammar.getVariables()){
+			if(!tokenList.contains(variable)){
+				grammar.getTerminals().remove(variable);
 			}
 		}
 		
