@@ -16,8 +16,16 @@ public abstract class Token {
 		this.value = value;
 	}
 	
+	@Override
 	public boolean equals(Object aToken){
+		//System.err.println(this.value + " == " + ((Token) aToken).value);
 		return this.value.equals(((Token) aToken).value);
 	}
+	
+	@Override
+    public int hashCode() {
+        int hash = value.hashCode();
+        return hash;
+    }
 	
 }

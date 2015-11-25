@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.swing.text.html.HTMLDocument.Iterator;
+
 public class ActionTable {
 	protected Grammar grammar;
 	protected HashMap<Variable, Token> matrix;
@@ -19,45 +21,79 @@ public class ActionTable {
 	public void build(){
 		
 		this.generateFirst();
-		this.generateFollow();
-		
+		//this.printFirst();
+		//this.generateFollow();
+		//this.printFollow();
 		//Lets browse the rules lists
 		
-		for(int i=0; i<grammar.getProductionRules().size();++i){
+		/*for(int i=0; i<grammar.getProductionRules().size();++i){
 			
 			//ProductionRule rule = grammar.getProductionRules().get(i);
 			
-		}
+		}*/
 		
 	}
+	
+	public void printFirst(){
+		for (Token name: first.keySet()){
+
+            String key = name.getValue();
+            String value = first.get(name).toString();  
+            
+            if(grammar.isVariable(name)){
+	            System.out.print("First("+ key +") : { ");  
+	            for(Token token : first.get(name)){
+	            	
+	            	System.out.print(token.getValue()+" , ");
+	            }
+	            System.out.println("}");
+            }
+		}
+	}
+	
+	public void printFollow(){
+		for (Token name: follow.keySet()){
+
+            String key = name.getValue();
+            String value = follow.get(name).toString();  
+            
+            System.out.print(key +" : {");  
+            for(Token token : follow.get(name)){
+            	System.out.print(token.getValue()+" , ");
+            }
+            System.out.println("}");
+		}
+	}
+	
+	private ArrayList<Token> getFirstTerminals(ArrayList<Token> tokenList){
+		ArrayList<Token> list = new ArrayList<Token>();
 		
-	public void generateFirst(){
-		
-		// Method slide 236 - 237
-		
-		/*
-		ArrayList<ArrayList<Token>> first = new ArrayList<ArrayList<Token>>();
-		
-		if(grammar.getVariables().contains(token) || grammar.getTerminals().contains(token)){
-			for(ProductionRule rule : grammar.getProductionRule((Variable) token)){
-				if(rule.getRightSide().size() > k){
-					ArrayList<Token> tokenList = new ArrayList<Token>();
-					int i = 0;
-					do{
-						tokenList.add(rule.getRightSide().get(i));
-						++i;
-					}while(grammar.isTerminal(rule.getRightSide().get(i)) && i<k);
-					
-					if(tokenList.size() == k){
-						first.add(tokenList);
-					}
-				}			
+		for(Token token : tokenList){	
+			if(grammar.isVariable(token)){	
 				
+				list.add(first.get(token).iterator().next());
+				
+				return list;
+			}else{
+				list.add(token);
 			}
 		}
 		
-		return first;
-		*/
+		return list;
+	}
+	
+	private boolean containsEmpty(ArrayList<Token> rightSide) {
+		
+		for(Token token : rightSide){
+			if(first.get(token).isEmpty()){
+				return true;
+			}
+		}
+		return false;
+		
+	}
+		
+	private void generateFirst(){
 		
 		// Method slide 239
 		
@@ -75,40 +111,59 @@ public class ActionTable {
 		}
 		
 		//Firstk(A) = {} or 0
-		for(Variable A : grammar.getVariables()){			
+		for(Variable A : grammar.getVariables()){	
 			first.put(A, new HashSet<Token>());
 		}
-		
+				
 		//Induction : loop until stabilisation (no more changes)
 		boolean isStabilized;
 		
+		int i = 1;
+		
 		do{
 			isStabilized = false;
+			
+			System.out.println("Step " + i +" : ");
 			for(Variable A : grammar.getVariables()){
+				
 				for(ProductionRule rule : grammar.getProductionRule(A)){
 					//First(A) U x | x belongs T*
 					//A -> Y1 Y2 ... Yn ~~ rule
 					//x belongs First(Y1) + First(Y2) + ... + First(Yn)
 					
-					for(Token rightSideToken : rule.getRightSide()){
-						if(!first.get(A).contains(rightSideToken)){
-							if(grammar.isVariable(rightSideToken)){
-								break;
-							}else{
-								first.get(A).addAll(first.get(rightSideToken));
+					if(!containsEmpty(rule.getRightSide())){
+						
+						for(Token rightSideToken : this.getFirstTerminals(rule.getRightSide()) ){	
+							
+							if(!first.get(A).contains(rightSideToken)){
+								System.out.println("First("+A.getValue() + ") <= {" + rightSideToken.getValue() +"}");
+
+								//first.get(A).addAll(first.get(rightSideToken));
+								first.get(A).add(rightSideToken);
 								isStabilized = true;
-							}
+								break;
+							
+							}	
+							
 						}
 						
 					}
+						
 					
 				}
+				
 			}
-		}while(!isStabilized);
+			
+			System.out.println("==================================\n");
+			System.out.println(isStabilized);
+			this.printFirst();
+			System.out.println("==================================\n");
+			++i;
+		}while(isStabilized);
 		
 	}
-	
-	public void generateFollow(){
+
+	private void generateFollow(){
 		// Base :
 		follow = new HashMap<Token, HashSet<Token>>();
 		
@@ -122,6 +177,7 @@ public class ActionTable {
 		
 		do{
 			isStabilized = false;
+			
 			for(Variable A : grammar.getVariables()){
 				for(ProductionRule rule : grammar.getProductionRule(A)){
 					for(int i = rule.getRightSide().size(); i > 0; --i){
@@ -139,7 +195,8 @@ public class ActionTable {
 					}
 				}
 			}
-		}while(!isStabilized);
+			
+		}while(isStabilized);
 		
 	
 	}
