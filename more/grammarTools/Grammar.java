@@ -35,6 +35,12 @@ public class Grammar {
 				String leftSide = splitLine[0].trim();
 				String rightSide[] = splitLine[1].trim().split("\\s\\|\\s");
 				
+				if (leftSide.startsWith("<") && leftSide.endsWith(">")) {
+					Variable aVariable = new Variable(leftSide);
+					if (!variables.contains(aVariable)) {
+						variables.add(aVariable);
+					}
+				}
 				
 				for (String expr : rightSide) {
 					ArrayList<Token> rightSideTokens = new ArrayList<Token>();
@@ -142,7 +148,7 @@ public class Grammar {
 	}
 	
 	public boolean isVariable(Token token) {
-		if(terminals.contains(token))
+		if(variables.contains(token))
 			return true;
 		else
 			return false;

@@ -5,6 +5,7 @@ import grammarAlgorithms.LeftRecursive;
 public class Main {
 
 	public static void main(String[] args) {
+
 		//Grammar aGrammar = new Grammar("more/grammar/supralgol-v0.grammar");
 		Grammar aGrammar = new Grammar("more/grammar/firstTest.grammar");
 		
