@@ -61,6 +61,7 @@ public class Grammar {
 				
 			}
 			startSymbol = productionRules.get(0).getLeftSide();
+			variables.add(startSymbol);
 			
 			reader.close();
 			
@@ -169,6 +170,16 @@ public class Grammar {
 		
 		System.out.println("Startsymbol :");
 		System.out.println(this.startSymbol.getValue());
+	}
+
+	public ArrayList<ProductionRule> getProductionRules(Variable aVariable) {
+		ArrayList<ProductionRule> res = new ArrayList<ProductionRule>();
+		for (ProductionRule pr : this.getProductionRules()) {
+			if (pr.getLeftSide().equals(aVariable)) {
+				res.add(pr);
+			}
+		}
+		return res;
 	}
 	
 }
