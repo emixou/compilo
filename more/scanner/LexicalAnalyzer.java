@@ -12,7 +12,7 @@ import java.util.HashMap;
  * on 24/11/15 1:41 from the specification file
  * <tt>scanner/LexicalAnalyzer.flex</tt>
  */
-class LexicalAnalyzer {
+public class LexicalAnalyzer {
 
   /** This character denotes the end of file */
   public static final int YYEOF = -1;
@@ -304,7 +304,7 @@ class LexicalAnalyzer {
    *
    * @param   in  the java.io.Reader to read input from.
    */
-  LexicalAnalyzer(java.io.Reader in) {
+  public LexicalAnalyzer(java.io.Reader in) {
     this.zzReader = in;
   }
 

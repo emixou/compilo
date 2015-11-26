@@ -1,22 +1,20 @@
 package grammarTools;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.regex.PatternSyntaxException;
+
 import grammarAlgorithms.LeftRecursive;
+import parser.Parser;
+import scanner.SyntaxErrorException;
 
 public class Main {
 
-	public static void main(String[] args) {
-
-		//Grammar aGrammar = new Grammar("more/grammar/supralgol-v0.grammar");
-		Grammar aGrammar = new Grammar("more/grammar/firstTest.grammar");
+	public static void main(String[] args) throws PatternSyntaxException, IOException, SyntaxErrorException {
 		
-		//LeftRecursive lr = new LeftRecursive(aGrammar);
-		//lr.execute();
-		ActionTable at = new ActionTable(aGrammar);
-		at.build();
+		Parser p = new Parser("more/grammar/supralgol-v2.grammar", new java.io.FileReader("test/Euclide.alg"));
+		p.parse();
 		
-		System.out.println(at);
-		
-		//aGrammar.repr();
 	}
 
 }

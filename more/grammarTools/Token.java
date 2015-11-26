@@ -1,5 +1,7 @@
 package grammarTools;
 
+import scanner.Symbol;
+
 public abstract class Token {
 
 	private String value;

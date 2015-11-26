@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import scanner.Symbol;
+
 
 public class ActionTable {
 	protected Grammar grammar;
@@ -18,6 +20,10 @@ public class ActionTable {
 		this.grammar = grammar;
 		this.matrix = new HashMap<Variable, HashMap<Terminal, ProductionRule>>();
 		this.epsilon = new Terminal("eps");
+	}
+	
+	public ProductionRule getRule(Token aVariable, Symbol aTerminal) {
+		return matrix.get(aVariable).get(new Terminal((String) aTerminal.getValue()));
 	}
 	
 	public void build(){
