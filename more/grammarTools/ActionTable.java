@@ -13,6 +13,7 @@ public class ActionTable {
 	
 	protected HashMap<String, HashSet<Token>> first;
 	protected HashMap<String, HashSet<Token>> follow;
+	protected HashMap<String, HashSet<Token>> followtmp;
 	
 	public ActionTable(Grammar grammar){
 		this.grammar = grammar;
@@ -144,10 +145,12 @@ public class ActionTable {
 	private void generateFollow(){
 		// Base :
 		follow = new HashMap<String, HashSet<Token>>();
+		followtmp = new HashMap<String, HashSet<Token>>();
 		
 		//Followk(A) = {} or 0
 		for(Variable A : grammar.getVariables()){			
 			follow.put(A.getValue(), new HashSet<Token>());
+			followtmp.put(A.getValue(), new HashSet<Token>());
 		}
 		
 		//Induction : loop until stabilisation (no more changes)
@@ -157,59 +160,61 @@ public class ActionTable {
 		
 		do{
 			isStabilized = true;
-			for(ProductionRule aRule : grammar.getProductionRules()){
-				
-				ArrayList<Token> rightPart = aRule.getRightSide();
-				for(int b=0; b<rightPart.size(); ++b){
-					if(!grammar.isTerminal(rightPart.get(b))){
+			
+			for(Variable aVariable : grammar.getVariables()){
+				for(ProductionRule aRule : grammar.getProductionRule((Token) aVariable)){			
+					ArrayList<Token> rightPart = aRule.getRightSide();
+					//if(aRule.getRightSide().contains(aVariable)){
 						
-						ArrayList<Token> remainingTerminals = new ArrayList<Token>(rightPart.subList(b+1, rightPart.size()));
+						int id = aRule.getRightSide().indexOf(aVariable);
 						
-						//A -> alphaBbeta
-						
-						// Follow(B) U First(Beta)
-						
-						/*if(remainingTerminals.size() > 0){
-							Token terminal = remainingTerminals.get(0);
-							for(Token aToken : first.get(terminal.getValue())){
-								if(!follow.get(rightPart.get(b).getValue()).contains(aToken)){
-									follow.get(rightPart.get(b).getValue()).add(aToken);
-									isStabilized = false;
-								}
-							}
-						}*/
-					
-						
+						ArrayList<Token> remainingTerminals = new ArrayList<Token>(rightPart.subList(id+1, rightPart.size()));					
 						for(Token terminal : remainingTerminals){
 							for(Token aToken : first.get(terminal.getValue())){
-								if(!follow.get(rightPart.get(b).getValue()).contains(aToken)){
-									follow.get(rightPart.get(b).getValue()).add(aToken);
+								//Follow B
+								if(!follow.get(rightPart.get(id).getValue()).contains(aToken) && !aToken.equals(epsilon)){
+									follow.get(rightPart.get(id).getValue()).add(aToken);
 									isStabilized = false;
 								}
 							}
 						}
 						
-						
-						// Follow(B) U Follow(Beta)
+						//Follow A
 						for(Token aToken : follow.get(aRule.getLeftSide().getValue())){
-							if(!follow.get(rightPart.get(b).getValue()).contains(aToken)){
-								follow.get(rightPart.get(b).getValue()).add(aToken);
-								isStabilized = false;
+							//Follow B
+							
+							if(!follow.get(rightPart.get(id).getValue()).contains(aToken)){
+								follow.get(rightPart.get(id).getValue()).add(aToken);
 							}
 						}
 						
 						
-					}
+						
+					//}
+					
 				}
 				
 			}
 			
 			System.out.println("============== STEP "+i+" ===============");
-			this.printFollow();
+			this.printFollow();			
 			System.out.println("=====================================\n");
 			++i;
 			
 		}while(!isStabilized);
+		
+		
+		for(Variable aVariable : grammar.getVariables()){
+			if(follow.get(aVariable.getValue()).isEmpty()){
+				follow.get(aVariable.getValue()).add(epsilon);
+			}
+		}
+		
+		System.out.println("============== STEP "+i+" ===============");
+		this.printFollow();			
+		System.out.println("=====================================\n");
+		++i;
+		
 		
 	
 	}
