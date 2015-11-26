@@ -3,35 +3,65 @@ package grammarTools;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 
-import javax.swing.text.html.HTMLDocument.Iterator;
 
 public class ActionTable {
 	protected Grammar grammar;
-	protected HashMap<Variable, Token> matrix;
+	protected HashMap<Variable, HashMap<Terminal, ProductionRule>> matrix;
+	
+	protected Terminal epsilon;
 	
 	protected HashMap<String, HashSet<Token>> first;
-	protected HashMap<Token, HashSet<Token>> follow;
+	protected HashMap<String, HashSet<Token>> follow;
 	
 	public ActionTable(Grammar grammar){
 		this.grammar = grammar;
+		this.matrix = new HashMap<Variable, HashMap<Terminal, ProductionRule>>();
+		this.epsilon = new Terminal("eps");
 	}
 	
 	public void build(){
 		
 		this.generateFirst();
 		//this.printFirst();
-		//this.generateFollow();
+		System.out.println("Generate Follow");
+		this.generateFollow();
 		//this.printFollow();
+		
 		//Lets browse the rules lists
+		this.initiliazeTable();
+		this.generateActionTable();
 		
-		/*for(int i=0; i<grammar.getProductionRules().size();++i){
-			
-			//ProductionRule rule = grammar.getProductionRules().get(i);
-			
-		}*/
-		
+	}
+	
+	public void initiliazeTable(){
+		for (Variable aVariable : this.grammar.getVariables()) {
+            matrix.put(aVariable, new HashMap<Terminal, ProductionRule>());
+            for (Terminal terminal : this.grammar.getTerminals()) {
+                matrix.get(aVariable).put(terminal, null);
+            }
+		}		
+	}
+	
+	public void generateActionTable(){
+		for(ProductionRule aRule : grammar.getProductionRules()){
+			//for(Token rightPart : aRule.getRightSide()){
+			for(int i = 0; i < aRule.getRightSide().size(); ++i){
+				
+				HashSet<Token> firstAlpha = first.get(aRule.getRightSide().get(i).getValue());				
+				for(Token aToken : firstAlpha){
+					matrix.get(aRule.getLeftSide()).put((Terminal) aToken, aRule);
+				}		
+						
+				if(firstAlpha.contains(epsilon)){
+					HashSet<Token> followA = follow.get(aRule.getLeftSide().getValue());	
+					for (Token aToken : followA){
+						matrix.get(aRule.getLeftSide()).put((Terminal) aToken, aRule);
+					}
+				}
+			}
+				
+		}
 	}
 	
 	public void printFirst(){
@@ -46,21 +76,18 @@ public class ActionTable {
 	}
 	
 	public void printFollow(){
-		for (Token name: follow.keySet()){
-
-            String key = name.getValue();
-            String value = follow.get(name).toString();  
-            
-            System.out.print(key +" : {");  
-            for(Token token : follow.get(name)){
-            	System.out.print(token.getValue()+" , ");
-            }
-            System.out.println("}");
+		for (Variable var : grammar.getVariables()) {
+			HashSet<Token> tkSet = follow.get(var.getValue());
+			System.out.print(var.getValue()+" : ");
+			for (Token tk : tkSet) {
+				System.out.print(tk.getValue()+" , ");
+			}
+			System.out.println();
 		}
 	}
 		
 
-	public void generateFirst(){
+	private void generateFirst(){
 		// Base :
 		first = new HashMap<String, HashSet<Token>>();
 		
@@ -116,38 +143,73 @@ public class ActionTable {
 
 	private void generateFollow(){
 		// Base :
-		follow = new HashMap<Token, HashSet<Token>>();
+		follow = new HashMap<String, HashSet<Token>>();
 		
 		//Followk(A) = {} or 0
 		for(Variable A : grammar.getVariables()){			
-			follow.put(A, new HashSet<Token>());
+			follow.put(A.getValue(), new HashSet<Token>());
 		}
 		
 		//Induction : loop until stabilisation (no more changes)
 		boolean isStabilized;
 		
+		int i = 0;
+		
 		do{
-			isStabilized = false;
-			
-			for(Variable A : grammar.getVariables()){
-				for(ProductionRule rule : grammar.getProductionRule(A)){
-					for(int i = rule.getRightSide().size(); i > 0; --i){
-						Token rightSideToken = rule.getRightSide().get(i);
-						if(!follow.get(A).contains(rightSideToken)){
-							if(grammar.isVariable(rightSideToken)){
-								follow.get(A).addAll(first.get(rightSideToken));
-								isStabilized = true;
-								break;
-							}else{
-								follow.get(A).addAll(follow.get(rightSideToken));
-								isStabilized = true;
+			isStabilized = true;
+			for(ProductionRule aRule : grammar.getProductionRules()){
+				
+				ArrayList<Token> rightPart = aRule.getRightSide();
+				for(int b=0; b<rightPart.size(); ++b){
+					if(!grammar.isTerminal(rightPart.get(b))){
+						
+						ArrayList<Token> remainingTerminals = new ArrayList<Token>(rightPart.subList(b+1, rightPart.size()));
+						
+						//A -> alphaBbeta
+						
+						// Follow(B) U First(Beta)
+						
+						/*if(remainingTerminals.size() > 0){
+							Token terminal = remainingTerminals.get(0);
+							for(Token aToken : first.get(terminal.getValue())){
+								if(!follow.get(rightPart.get(b).getValue()).contains(aToken)){
+									follow.get(rightPart.get(b).getValue()).add(aToken);
+									isStabilized = false;
+								}
+							}
+						}*/
+					
+						
+						for(Token terminal : remainingTerminals){
+							for(Token aToken : first.get(terminal.getValue())){
+								if(!follow.get(rightPart.get(b).getValue()).contains(aToken)){
+									follow.get(rightPart.get(b).getValue()).add(aToken);
+									isStabilized = false;
+								}
 							}
 						}
+						
+						
+						// Follow(B) U Follow(Beta)
+						for(Token aToken : follow.get(aRule.getLeftSide().getValue())){
+							if(!follow.get(rightPart.get(b).getValue()).contains(aToken)){
+								follow.get(rightPart.get(b).getValue()).add(aToken);
+								isStabilized = false;
+							}
+						}
+						
+						
 					}
 				}
+				
 			}
 			
-		}while(isStabilized);
+			System.out.println("============== STEP "+i+" ===============");
+			this.printFollow();
+			System.out.println("=====================================\n");
+			++i;
+			
+		}while(!isStabilized);
 		
 	
 	}

@@ -12,7 +12,7 @@ public class Main {
 		//LeftRecursive lr = new LeftRecursive(aGrammar);
 		//lr.execute();
 		ActionTable at = new ActionTable(aGrammar);
-		at.generateFirst();
+		at.build();
 		
 		//aGrammar.repr();
 	}
