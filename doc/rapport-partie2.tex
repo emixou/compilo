@@ -1,0 +1,71 @@
+\documentclass[pdftex,10pt,a4paper]{article} \usepackage[utf8]{inputenc}
+\usepackage[francais]{babel}
+\usepackage{hyperref}
+\usepackage{eurosym}
+\usepackage[a4paper]{geometry}
+\usepackage{graphicx}
+
+\geometry{hscale=0.75,vscale=0.80,centering}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+
+\includegraphics[width=0.45\textwidth]{./sceau-a-quadri.jpg}\\[1cm]
+
+\textsc{\LARGE Université Libre de Bruxelles}\\[1.5cm]
+\textsc{\Large INFO-F-403\\ Introduction to language theory and compiling}\\[1.5cm]
+
+\HRule \\[0.4cm]
+{ \huge \bfseries Assignement 2 : The parser\\[0.4cm] }
+
+\HRule \\[1.5cm]
+
+\center{Maxime \textsc{Desclefs} - 362626}
+\center{Julian \textsc{Schembri} - 380446}
+
+\vfill
+{\large 2015 - 2016}
+
+\end{center}
+\end{titlepage}
+
+\newpage
+
+\section{Introduction}
+
+Dans le cadre du cours d'introduction à la théorie du langage et de compilation (INFO-F-403), il a été demandé d'implémenter et d'écrire un compilateur pour le langage SUPRALGOL$^{2016}$, une variante du langage Algol68.\\\\ 
+
+La première partie consistait en la création du scanner. Ce scanner analyse et découpe, ensuite, un code SUPRALGOL$^{2016}$ permettant d'identifier chacun des éléments de ce dernier, et leur correspondance dans ce langage.
+La deuxième partie consistait en la création du parser. Ce parser [\ldots]\\\\
+
+Il fallait, dans un premier temps, transformer la grammaire SUPRALGOL$^{2016}$ afin de la rendre LL(1). Quatre étapes sont nécessaires à cette transformation : la suppression des symboles inutiles, la suppression de la récursivité à gauche, la factorisation des règles, ainsi que la prise en compte de la priorité et l'associativité des opérateurs pour rendre la grammaire non-ambigüe.\\ Sur base de cette nouvelle grammaire et quelques manipulations, une \textit{action table} a pu être créée, rendant possible l'exécution du parser LL(1) qu'il a été demandé de réaliser.\\\\
+
+Etant donné la demande de justificatifs des différentes étapes, l'attention a été portée sur l'implémentation des différents algorithmes en vue de l'obtention des réponses les plus adéquates. Dans la suite de ce rapport, seront expliqué les différentes opérations, ainsi que les résultats ayant pu être obtenus grâce à ces dernières.
+
+\section{Grammaire}
+
+Une grammaire permet de définir un langage en définissant sa syntaxe. Elle décrit donc l'ensemble des mots adminissibles, que nous appelerons \textit{terminaux}, à ce langage sur un alphabet donné, que nous appelerons \textit{variables}. 
+
+\subsection{Suppression des variables inutiles}
+
+Une variable est inutile si elle ne rempli pas l'une des fonction suivante : être accessible depuis le symbole de départ et produire quelque chose. Dès lors les variables inutiles détectées, elles peuvent être supprimées des différentes listes ainsi que des différentes règles dans lesquelles elles se trouvent. 
+
+\subsection{Priorité et associativité des opérateurs}
+Afin de rendre la grammaire non-ambigüe, il est nécessaire d'appliquer les priorités et les associativités possible sur les différents opérateurs de cette dernière.\\ Dans les règles de la grammaire, les plus importantes, ç-à-d avec une priorité plus élevée, se trouvent les plus haut dans la grammaire. Ceci peut être expliqué par le parcours des règles (parcours de liste type \textit{ArrayList}); en effet les premières règles, ç-à-d tout en haut de la liste, sont executées en premier. Il ne reste donc qu'à intervertir, remplacer, décaler, des règles en les montant pour en augmenter la priorité ou bien les descendre dans le cas échéant. Si des opérateurs ont la même priorité, ils sont mis sur une même ligne.
+
+\subsection{Suppresion de la récursivité à gauche}
+La récursivité à gauche est un problème pour le $\leftarrow$\textit{Top-Down parsing}$\rightarrow$. En effet, cette classe de parseur utilise, comme demandé dans l'énoncé, la $\leftarrow$\textit{Left-most derivation}$\rightarrow$. Pour pallier à ce problème, la récursivité à gauche va être remplacée par une autre sorte de récursivité. L'introduction d'une nouvelle variable est nécessaire.
+
+\subsection{Factorisation à gauche}
+Pour les $\leftarrow$\textit{Top-Down parsing}$\rightarrow$, chacunes des règles de la grammaire doit être factorisées à gauche. Comme pour le point précédent sur la recursivité, l'introduction d'une nouvelle variable est nécessaire. Cette étape consiste à rassembler les différents terminaux, ayant un préfixe commun (différent d'\epsilon), d'une variable, dans cette nouvelle variable recemment introduite. Cela enlève une ambigüité et permet au parser de savoir directement quelle règle choisir sans devoir toutes les parcourir.
+
+\section{Action table}
+
+Comme mentionné dans l'introduction, la construction d'une table d'action est nécessaire au bon fonctionnement du parser. Pour chaque symbole, le parseur doit savoir deux choses sur ce dernier : \textit{First(X)} et \textit{Follow(X)} où X est le symbole. La grammaire étant de type LL(1), les différents algorithmes faisant présence d'un ordre de grandeur \textit{k} se le voient attribué à 1. \textit{First} est donc l'ensemble des premiers terminaux (vecteur d'un seul terminal) rencontré pouvant commencer un mot généré à partir d'une variable. \textit{Follow} s'applique pour les terminaux qui suivent le mot. Sur base de ces deux vecteurs , la table d'action peut être construite.
+
+
+\end{document}
