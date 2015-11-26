@@ -67,7 +67,6 @@ public class Grammar {
 				
 			}
 			startSymbol = productionRules.get(0).getLeftSide();
-			variables.add(startSymbol);
 			
 			reader.close();
 			
