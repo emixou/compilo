@@ -14,6 +14,8 @@ public class Main {
 		ActionTable at = new ActionTable(aGrammar);
 		at.build();
 		
+		System.out.println(at);
+		
 		//aGrammar.repr();
 	}
 

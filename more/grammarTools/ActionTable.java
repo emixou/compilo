@@ -13,7 +13,6 @@ public class ActionTable {
 	
 	protected HashMap<String, HashSet<Token>> first;
 	protected HashMap<String, HashSet<Token>> follow;
-	protected HashMap<String, HashSet<Token>> followtmp;
 	
 	public ActionTable(Grammar grammar){
 		this.grammar = grammar;
@@ -145,12 +144,10 @@ public class ActionTable {
 	private void generateFollow(){
 		// Base :
 		follow = new HashMap<String, HashSet<Token>>();
-		followtmp = new HashMap<String, HashSet<Token>>();
 		
 		//Followk(A) = {} or 0
 		for(Variable A : grammar.getVariables()){			
 			follow.put(A.getValue(), new HashSet<Token>());
-			followtmp.put(A.getValue(), new HashSet<Token>());
 		}
 		
 		//Induction : loop until stabilisation (no more changes)
@@ -182,6 +179,7 @@ public class ActionTable {
 						tokenSetFollow.addAll(follow.get(aRule.getLeftSide().getValue()));
 						
 						HashSet<Token> finalTokenSet = new HashSet<Token>();
+						
 						if(tokenSetFollow.isEmpty()){
 							finalTokenSet.addAll(tokenSetFirst);
 						}else if(tokenSetFirst.isEmpty()){
@@ -189,7 +187,6 @@ public class ActionTable {
 						}else if(!tokenSetFollow.isEmpty() && !tokenSetFirst.isEmpty()){
 							for(Token tokenFirst : tokenSetFirst){
 								for(Token tokenFollow : tokenSetFollow){
-									
 									//Follow will already add first
 									if(tokenFirst.equals(epsilon)){
 										finalTokenSet.add(tokenFollow);
@@ -211,10 +208,6 @@ public class ActionTable {
 								isStabilized = false;
 							}
 						}
-						
-						
-						
-					//}
 					
 				}
 				
@@ -238,8 +231,40 @@ public class ActionTable {
 		this.printFollow();			
 		System.out.println("=====================================\n");
 		++i;
-		
-		
-	
+			
 	}
+	
+	@Override
+    public String toString() {
+        String result = "";
+        
+        for (ProductionRule productionRule : grammar.getProductionRules()) {
+            result += productionRule.getRuleNumber() +" : " + productionRule.toString() + "\n";
+        }
+
+        result += " \t";
+        for (Terminal aTerminal : grammar.getTerminals()) {
+            result += aTerminal.getValue() + "\t";
+        }
+
+        result += "\n";
+
+        for (Variable aVariable : grammar.getVariables()) {
+        	
+            result += aVariable.getValue() + " \t";
+            for (Terminal aTerminal : grammar.getTerminals()) {
+            	
+                ProductionRule productionRule = matrix.get(aVariable).get(aTerminal);
+                if (productionRule == null) {
+                    result += "/" + " \t";
+                } else {
+                    result += productionRule.getRuleNumber() + " \t";
+                }
+                
+            }
+            result += "\n";
+            
+        }
+        return result;
+    }
 }

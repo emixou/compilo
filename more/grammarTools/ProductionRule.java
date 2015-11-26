@@ -6,23 +6,26 @@ public class ProductionRule {
 
 	private Variable leftSide;
 	private ArrayList<Token> rightSide;
-	private int rulesNumber = 0;
+	private static int ruleCounter = 0;
+	private int ruleNumber;
 	
 	public ProductionRule(Variable leftSide, Token rightSide){
 		this.leftSide = leftSide;
 		this.rightSide = new ArrayList<Token>();
 		this.rightSide.add(rightSide);
-		++this.rulesNumber;
+		++ruleCounter;
+		this.ruleNumber = ruleCounter;
 	}
 	
 	public ProductionRule(Variable leftSide, ArrayList<Token> rightSide){
 		this.leftSide = leftSide;
 		this.rightSide = rightSide;
-		this.rulesNumber = rightSide.size();
+		++ruleCounter;
+		this.ruleNumber = ruleCounter;
 	}
 	
-	public int getRulesNumber(){
-		return this.rulesNumber;
+	public int getRuleNumber(){
+		return ruleNumber;
 	}
 	
 	public Variable getLeftSide(){
@@ -39,12 +42,10 @@ public class ProductionRule {
 	
 	public void setRightSide(ArrayList<Token> rightSide){
 		this.rightSide = rightSide;
-		this.rulesNumber = rightSide.size();
 	}
 
 	public void addToken(Token Token){
 		this.rightSide.add(Token);
-		++this.rulesNumber;
 	}
 
 	public boolean isLeftRecursive() {
@@ -52,11 +53,20 @@ public class ProductionRule {
 	}
 	
 	public void repr() {
-		System.out.print(this.getLeftSide().getValue()+" -> ");
-		for (Token aToken : this.getRightSide() ) {
-			System.out.print(aToken.getValue()+" ");
-		}
-		System.out.println();
+		System.out.println(this.toString());
 		
 	}
+	
+	@Override
+    public String toString() {
+        String result = "";
+        
+        result+= this.getLeftSide().getValue()+" -> ";
+		for (Token aToken : this.getRightSide() ) {
+			result+= aToken.getValue()+" ";
+		}
+		
+        return result;
+	}
+	
 }
