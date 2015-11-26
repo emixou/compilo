@@ -164,27 +164,51 @@ public class ActionTable {
 			for(Variable aVariable : grammar.getVariables()){
 				for(ProductionRule aRule : grammar.getProductionRule((Token) aVariable)){			
 					ArrayList<Token> rightPart = aRule.getRightSide();
-					//if(aRule.getRightSide().contains(aVariable)){
 						
 						int id = aRule.getRightSide().indexOf(aVariable);
+						
+						HashSet<Token> tokenSetFirst = new HashSet<Token>();
 						
 						ArrayList<Token> remainingTerminals = new ArrayList<Token>(rightPart.subList(id+1, rightPart.size()));					
 						for(Token terminal : remainingTerminals){
 							for(Token aToken : first.get(terminal.getValue())){
 								//Follow B
-								if(!follow.get(rightPart.get(id).getValue()).contains(aToken) && !aToken.equals(epsilon)){
-									follow.get(rightPart.get(id).getValue()).add(aToken);
-									isStabilized = false;
+								tokenSetFirst.add(aToken);
+							}
+						}
+						
+						HashSet<Token> tokenSetFollow = new HashSet<Token>();
+						//Follow A
+						tokenSetFollow.addAll(follow.get(aRule.getLeftSide().getValue()));
+						
+						HashSet<Token> finalTokenSet = new HashSet<Token>();
+						if(tokenSetFollow.isEmpty()){
+							finalTokenSet.addAll(tokenSetFirst);
+						}else if(tokenSetFirst.isEmpty()){
+							finalTokenSet.addAll(tokenSetFollow);
+						}else if(!tokenSetFollow.isEmpty() && !tokenSetFirst.isEmpty()){
+							for(Token tokenFirst : tokenSetFirst){
+								for(Token tokenFollow : tokenSetFollow){
+									
+									//Follow will already add first
+									if(tokenFirst.equals(epsilon)){
+										finalTokenSet.add(tokenFollow);
+									}else{
+										finalTokenSet.add(tokenFirst);
+									}
+									
 								}
 							}
 						}
 						
-						//Follow A
-						for(Token aToken : follow.get(aRule.getLeftSide().getValue())){
-							//Follow B
-							
+						if(finalTokenSet.contains(epsilon)){
+							finalTokenSet.remove(epsilon);
+						}
+						
+						for(Token aToken : finalTokenSet){
 							if(!follow.get(rightPart.get(id).getValue()).contains(aToken)){
 								follow.get(rightPart.get(id).getValue()).add(aToken);
+								isStabilized = false;
 							}
 						}
 						
@@ -195,7 +219,7 @@ public class ActionTable {
 				}
 				
 			}
-			
+				
 			System.out.println("============== STEP "+i+" ===============");
 			this.printFollow();			
 			System.out.println("=====================================\n");
