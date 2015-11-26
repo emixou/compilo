@@ -22,8 +22,8 @@ public class ActionTable {
 		this.epsilon = new Terminal("eps");
 	}
 	
-	public ProductionRule getRule(Token aVariable, Symbol aTerminal) {
-		return matrix.get(aVariable).get(new Terminal((String) aTerminal.getValue()));
+	public ProductionRule getRule(Token aVariable, Token aTerminal) {
+		return matrix.get(aVariable).get(aTerminal);
 	}
 	
 	public void build(){
