@@ -7,6 +7,7 @@ import java.util.regex.PatternSyntaxException;
 import grammarTools.ActionTable;
 import grammarTools.Grammar;
 import grammarTools.ProductionRule;
+import grammarTools.Terminal;
 import grammarTools.Token;
 import scanner.LexicalAnalyzer;
 import scanner.Symbol;
@@ -29,17 +30,18 @@ public class Parser {
 	public void parse() throws PatternSyntaxException, IOException, SyntaxErrorException {
 		stack.push(grammar.getStartSymbol());
 		
-		Symbol head = scanner.nextToken();
+		Terminal head = new Terminal(scanner.nextToken());
 		Token top = stack.top();
 		while (true) { // no error nor accept
 			
 			System.out.println("Top : "+top.getValue()+" Head : "+head.getValue());
 			
-			if (grammar.isTerminal(top) && head.getValue().equals(top.getValue())) {
+			if (grammar.isTerminal(top) && head.equals(top)) {
 				System.out.println("Match");
-				head = scanner.nextToken();
+				head = new Terminal(scanner.nextToken());
 				top = stack.pop();
 			}else if (!grammar.isTerminal(top) && actionTable.getRule(top,head)!= null) {
+				System.out.println("Rule : "+actionTable.getRule(top,head).getRuleNumber()+" "+actionTable.getRule(top,head).toString());
 				produce(actionTable.getRule(top,head));
 				top = stack.pop();
 			} else if (head.getValue().equals("eps") && stack.isEmpty()) {

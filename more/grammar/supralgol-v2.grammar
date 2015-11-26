@@ -18,7 +18,6 @@
 <Cond1'> -> <BinOp'> <Cond2> <Cond1> | eps
 <Cond1> -> <Cond2> <Cond1'>
 <Cond2'> -> <BinOp''> <Cond> <Cond2'> | eps
-<Cond2> -> <Cond> <Cond2'>
 <SimpleCond> -> <ExprArith> <Comp> <ExprArith>
 <BinOp'> -> and
 <BinOp''> -> or
