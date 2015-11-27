@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import grammarTools.Token;
 
 public class Stack extends ArrayList<Token> {
+
 	public void push(Token aToken) {
 		this.add(aToken);
 	}

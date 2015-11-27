@@ -19,6 +19,8 @@ public class Terminal extends Token{
 			res = "[VarName]";
 		} else if (aSymbol.getType().equals(LexicalUnit.NUMBER)) {
 			res= "[Number]";
+		} else if (aSymbol.getType().equals(LexicalUnit.END_OF_STREAM)) {
+			res = null;
 		} else {
 			res = aSymbol.getValue().toString();
 		}

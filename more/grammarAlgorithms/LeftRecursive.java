@@ -64,7 +64,7 @@ public class LeftRecursive implements Algorithm {
 					this.grammar.getProductionRules().add(new ProductionRule(newVar, newRightSide));
 				}
 				ArrayList<Token> newRightSide = new ArrayList<Token>();
-				newRightSide.add(new Terminal("ε"));
+				newRightSide.add(new Terminal("eps"));
 				this.grammar.getProductionRules().add(new ProductionRule(newVar,newRightSide));
 				this.grammar.getVariables().add(newVar);
 			

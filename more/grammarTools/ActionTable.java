@@ -1,12 +1,8 @@
 package grammarTools;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-
-import scanner.Symbol;
-
 
 public class ActionTable {
 	protected Grammar grammar;
