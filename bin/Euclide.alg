@@ -7,7 +7,7 @@ begin
   while b /= 0 do
     c := b ;
     while a >= b do     co computation of modulo co
-      a := a-b
+      a := a - b
     od ;
     b := a ;
     a := c

@@ -10,6 +10,7 @@ import grammarTools.ProductionRule;
 import grammarTools.Terminal;
 import grammarTools.Token;
 import scanner.LexicalAnalyzer;
+import scanner.Symbol;
 import scanner.SyntaxErrorException;
 
 public class Parser {
@@ -21,36 +22,32 @@ public class Parser {
 	public Parser(String grammarFileName, java.io.FileReader program) {
 		stack = new Stack();
 		grammar = new Grammar(grammarFileName);
-		for(Terminal terminal : grammar.getTerminals()){
-			System.out.println(terminal.getValue());
-		}
-		
 		actionTable = new ActionTable(grammar);
 		actionTable.build();
-
-		System.out.println(actionTable.toLatex());
-		System.out.println(actionTable.firstFollowToLatex());
-		
 		scanner = new LexicalAnalyzer(program);
 	}
 	
 	public void parse() throws PatternSyntaxException, IOException, SyntaxErrorException {
 		stack.push(grammar.getStartSymbol());
 		
-		Terminal head = new Terminal(scanner.nextToken());
+		Symbol symbol = scanner.nextToken();
+		Terminal head = new Terminal(symbol);
 		Token top = stack.top();
 		while (true) { // no error nor accept	
 			if (head.getValue()==null && stack.isEmpty()) {
 				accept();
 				break;
 			} else if (grammar.isTerminal(top) && head.equals(top)) {
-				head = new Terminal(scanner.nextToken());
+				symbol = scanner.nextToken();
+				head = new Terminal(symbol);
 				top = stack.pop();
 			}else if (!grammar.isTerminal(top) && actionTable.getRule(top,head)!= null) {
-				produce(actionTable.getRule(top,head));
+				ProductionRule aRule = actionTable.getRule(top,head);
+				System.out.println(aRule.getRuleNumber());
+				produce(aRule);
 				top = stack.pop();
 			} else {
-				error();
+				error(symbol);
 				break;
 			}
 		}
@@ -71,8 +68,8 @@ public class Parser {
 		System.out.println("Accepted.");
 	}
 	
-	private void error() {
-		System.out.println("Error.");
+	private void error(Symbol symbol) {
+		System.out.println("Error : unexpected symbol '"+symbol.getValue()+"' at line "+symbol.getLine()+":"+symbol.getColumn()+".");
 	}
 	
 }

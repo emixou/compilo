@@ -3,6 +3,7 @@ package grammarTools;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import grammarTools.Token;
 import grammarTools.Terminal;
@@ -24,7 +25,15 @@ public class Grammar {
  
 	public Grammar(String fileName) {
 	    try {
-	    	BufferedReader reader = new BufferedReader(new FileReader(fileName));
+	    	BufferedReader reader;
+	    	if (getClass().getResource("Grammar.class").toString().startsWith("file:/")) {
+	    		reader = new BufferedReader(new FileReader(fileName));
+	    	} else {
+	    		//String path = getClass().getResource("/")+"../more/grammar/supralgol-v2.grammar";
+	    		//System.out.println(path);
+	    		//reader = new BufferedReader(new FileReader(path));
+	    		reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("more/" + fileName)));
+	    	}
 	    	String line;
 	    	productionRules = new ArrayList<ProductionRule>();
 	    	terminals = new ArrayList<Terminal>();

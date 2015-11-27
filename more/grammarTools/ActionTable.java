@@ -30,14 +30,10 @@ public class ActionTable {
 	public void build(){
 		
 		this.generateFirst();
-		//this.printFirst();
-		System.out.println("Generate Follow");
 		this.generateFollow();
-		//this.printFollow();
 		
 		//Lets browse the rules lists
 		this.initiliazeTable();
-		System.out.println(toString());
 		this.generateActionTable();
 		
 	}
@@ -142,14 +138,14 @@ public class ActionTable {
 					}
 				}	
 			}
-			System.out.println("============== STEP "+i+" ===============");
+			/*System.out.println("============== STEP "+i+" ===============");
 			this.printFirst();
 			System.out.println("=====================================\n");
-			++i;
+			++i;*/
 			
 		}while(!isStabilized);
 		
-		this.printFirst();
+		//this.printFirst();
 	}
 	
 	private boolean isUsable(ProductionRule aRule) {
@@ -233,10 +229,10 @@ public class ActionTable {
 				
 			}
 				
-			System.out.println("============== STEP "+i+" ===============");
+			/*System.out.println("============== STEP "+i+" ===============");
 			this.printFollow();			
 			System.out.println("=====================================\n");
-			++i;
+			++i;*/
 			
 		}while(!isStabilized);
 		
@@ -247,10 +243,10 @@ public class ActionTable {
 			}
 		}
 		
-		System.out.println("============== STEP "+i+" ===============");
+		/*System.out.println("============== STEP "+i+" ===============");
 		this.printFollow();			
 		System.out.println("=====================================\n");
-		++i;
+		++i;*/
 			
 	}
 	
