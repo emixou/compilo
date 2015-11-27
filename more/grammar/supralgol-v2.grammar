@@ -3,22 +3,21 @@
 <InstList> -> <Instruction> <InstList'>
 <InstList'> -> eps | ; <InstList>
 <Instruction> -> <Assign> | <If> | <While> | <For> | <Print> | <Read>
-<Assign> -> [VarName] := <ExprArith>
-<ExprArith> -> [VarName] | [Number] | ( <ExprArith> ) | <ExprArith0>
-<ExprArith0'> -> <Op'> <ExprArith> <ExprArith0'> | eps
-<ExprArith0> -> <ExprArith1> <ExprArith0'>
-<ExprArith1'> ->  <Op''> <ExprArith> <ExprArith1'> | eps
-<ExprArith1> ->  <ExprArith2> <ExprArith1'>
-<ExprArith2> -> - <ExprArith> |
+<Assign> -> [VarName] := <ExprArith> 
+<ExprArith'> -> <Op'> <ExprArith> <ExprArith'> | eps
+<ExprArith> -> <ExprArith0> <ExprArith'>
+<ExprArith0'> ->  <Op''> <ExprArith> <ExprArith0'> | eps
+<ExprArith0> ->  <ExprArith1> <ExprArith0'>
+<ExprArith1> -> - <ExprArith> | [VarName] | [Number] | ( <ExprArith> )
 <Op'> -> + | -
 <Op''> -> * | /
 <If> -> if <Cond> then <Code> <If'>
 <If'> -> fi | else <Code> fi
-<Cond> -> not <Cond0> | <Cond0>
-<Cond0> -> <SimpleCond> | <Cond1>
-<Cond1'> -> <BinOp'> <Cond2> <Cond1> | eps
-<Cond1> -> <Cond2> <Cond1'>
-<Cond2'> -> <BinOp''> <Cond> <Cond2'> | eps
+<Cond'> -> <BinOp'> <Cond> <Cond'> | eps
+<Cond> -> <Cond0> <Cond'>
+<Cond0'> -> <BinOp''> <Cond> <Cond0'> | eps
+<Cond0> -> <Cond1> <Cond0'>
+<Cond1> -> not <SimpleCond> | <SimpleCond>
 <SimpleCond> -> <ExprArith> <Comp> <ExprArith>
 <BinOp'> -> and
 <BinOp''> -> or
