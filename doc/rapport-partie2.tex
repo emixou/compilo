@@ -7,6 +7,7 @@
 \usepackage{graphicx}
 \usepackage{lscape}
 \usepackage{longtable}
+\usepackage{listings}
 
 
 \geometry{hscale=0.75,vscale=0.80,centering}
@@ -165,6 +166,579 @@ L'implémentation des différents algorithmes n'a pas été une tache facile. Ce
 Lors de la précédente itération, le rapport avait été quelqu'un peu négligé et cela s'était ressenti. C'est donc pour cela que celui-ci a été mieux préparé, et realisé de la manière la plus claire possible.
 
 \section{Annexe}
+
+
+\noindent\rule[0.5ex]{\linewidth}{1pt}
+\textbf{1. Calcul des différentes listes First}\\
+\noindent\rule[0.5ex]{\linewidth}{1pt}
+
+\begin{lstlisting}[breaklines]
+
+============== STEP 0 ===============
+<Program> : 
+<Code> : eps , 
+<InstList> : 
+<Instruction> : 
+<InstList'> : eps , 
+<Assign> : 
+<If> : 
+<While> : 
+<For> : 
+<Print> : print , 
+<Read> : read , 
+<ExprArith> : 
+<ExprArith0> : 
+<ExprArith0'> : eps , 
+<Op'> : * , / , 
+<ExprArith1> : 
+<ExprArith1'> : eps , 
+<Op''> : + , - , 
+<ExprArith2> : [VarName] , [Number] , 
+<Cond> : 
+<If'> : fi , else , 
+<Cond0> : 
+<SimpleCond> : 
+<Cond1> : 
+<Cond1'> : eps , 
+<BinOp'> : and , 
+<Cond2> : 
+<Cond2'> : eps , 
+<BinOp''> : or , 
+<Comp> : <= , < , = , > , /= , >= , 
+=====================================
+
+============== STEP 1 ===============
+<Program> : begin , 
+<Code> : eps , 
+<InstList> : 
+<Instruction> : print , read , 
+<InstList'> : eps , 
+<Assign> : 
+<If> : 
+<While> : 
+<For> : 
+<Print> : print , 
+<Read> : read , 
+<ExprArith> : 
+<ExprArith0> : 
+<ExprArith0'> : eps , 
+<Op'> : * , / , 
+<ExprArith1> : [VarName] , [Number] , 
+<ExprArith1'> : eps , 
+<Op''> : + , - , 
+<ExprArith2> : [VarName] , [Number] , 
+<Cond> : 
+<If'> : fi , else , 
+<Cond0> : 
+<SimpleCond> : 
+<Cond1> : 
+<Cond1'> : eps , 
+<BinOp'> : and , 
+<Cond2> : 
+<Cond2'> : eps , 
+<BinOp''> : or , 
+<Comp> : <= , < , = , > , /= , >= , 
+=====================================
+
+============== STEP 2 ===============
+<Program> : begin , 
+<Code> : eps , 
+<InstList> : print , read , 
+<Instruction> : print , read , 
+<InstList'> : eps , ; , 
+<Assign> : 
+<If> : 
+<While> : 
+<For> : 
+<Print> : print , 
+<Read> : read , 
+<ExprArith> : 
+<ExprArith0> : [VarName] , [Number] , 
+<ExprArith0'> : eps , 
+<Op'> : * , / , 
+<ExprArith1> : [VarName] , [Number] , 
+<ExprArith1'> : eps , 
+<Op''> : + , - , 
+<ExprArith2> : [VarName] , [Number] , 
+<Cond> : 
+<If'> : fi , else , 
+<Cond0> : 
+<SimpleCond> : 
+<Cond1> : 
+<Cond1'> : eps , 
+<BinOp'> : and , 
+<Cond2> : 
+<Cond2'> : eps , 
+<BinOp''> : or , 
+<Comp> : <= , < , = , > , /= , >= , 
+=====================================
+
+============== STEP 3 ===============
+<Program> : begin , 
+<Code> : print , read , eps , 
+<InstList> : print , read , 
+<Instruction> : print , read , 
+<InstList'> : eps , ; , 
+<Assign> : 
+<If> : 
+<While> : 
+<For> : for , 
+<Print> : print , 
+<Read> : read , 
+<ExprArith> : [VarName] , - , [Number] , 
+<ExprArith0> : [VarName] , [Number] , 
+<ExprArith0'> : eps , * , / , 
+<Op'> : * , / , 
+<ExprArith1> : [VarName] , [Number] , 
+<ExprArith1'> : eps , + , - , 
+<Op''> : + , - , 
+<ExprArith2> : [VarName] , ( , [Number] , 
+<Cond> : 
+<If'> : fi , else , 
+<Cond0> : 
+<SimpleCond> : [VarName] , - , [Number] , 
+<Cond1> : 
+<Cond1'> : eps , 
+<BinOp'> : and , 
+<Cond2> : 
+<Cond2'> : eps , 
+<BinOp''> : or , 
+<Comp> : <= , < , = , > , /= , >= , 
+=====================================
+
+============== STEP 4 ===============
+<Program> : begin , 
+<Code> : print , read , eps , 
+<InstList> : print , read , 
+<Instruction> : print , read , for , 
+<InstList'> : eps , ; , 
+<Assign> : [VarName] , 
+<If> : 
+<While> : 
+<For> : for , 
+<Print> : print , 
+<Read> : read , 
+<ExprArith> : [VarName] , - , [Number] , 
+<ExprArith0> : [VarName] , [Number] , 
+<ExprArith0'> : eps , * , / , 
+<Op'> : * , / , 
+<ExprArith1> : [VarName] , ( , [Number] , 
+<ExprArith1'> : eps , + , - , 
+<Op''> : + , - , 
+<ExprArith2> : [VarName] , ( , [Number] , 
+<Cond> : 
+<If'> : fi , else , 
+<Cond0> : [VarName] , - , [Number] , 
+<SimpleCond> : [VarName] , - , [Number] , 
+<Cond1> : 
+<Cond1'> : eps , 
+<BinOp'> : and , 
+<Cond2> : 
+<Cond2'> : eps , 
+<BinOp''> : or , 
+<Comp> : <= , < , = , > , /= , >= , 
+=====================================
+
+============== STEP 5 ===============
+<Program> : begin , 
+<Code> : print , read , eps , 
+<InstList> : print , read , for , 
+<Instruction> : [VarName] , print , read , for , 
+<InstList'> : eps , ; , 
+<Assign> : [VarName] , 
+<If> : 
+<While> : while , 
+<For> : for , 
+<Print> : print , 
+<Read> : read , 
+<ExprArith> : [VarName] , - , [Number] , 
+<ExprArith0> : [VarName] , ( , [Number] , 
+<ExprArith0'> : eps , * , / , 
+<Op'> : * , / , 
+<ExprArith1> : [VarName] , ( , [Number] , 
+<ExprArith1'> : eps , + , - , 
+<Op''> : + , - , 
+<ExprArith2> : [VarName] , ( , [Number] , 
+<Cond> : [VarName] , not , - , [Number] , 
+<If'> : fi , else , 
+<Cond0> : [VarName] , - , [Number] , 
+<SimpleCond> : [VarName] , - , [Number] , 
+<Cond1> : 
+<Cond1'> : eps , 
+<BinOp'> : and , 
+<Cond2> : 
+<Cond2'> : or , eps , 
+<BinOp''> : or , 
+<Comp> : <= , < , = , > , /= , >= , 
+=====================================
+
+============== STEP 6 ===============
+<Program> : begin , 
+<Code> : print , read , for , eps , 
+<InstList> : [VarName] , print , read , for , 
+<Instruction> : [VarName] , print , read , for , while , 
+<InstList'> : eps , ; , 
+<Assign> : [VarName] , 
+<If> : if , 
+<While> : while , 
+<For> : for , 
+<Print> : print , 
+<Read> : read , 
+<ExprArith> : [VarName] , ( , - , [Number] , 
+<ExprArith0> : [VarName] , ( , [Number] , 
+<ExprArith0'> : eps , * , / , 
+<Op'> : * , / , 
+<ExprArith1> : [VarName] , ( , [Number] , 
+<ExprArith1'> : eps , + , - , 
+<Op''> : + , - , 
+<ExprArith2> : [VarName] , ( , [Number] , 
+<Cond> : [VarName] , not , - , [Number] , 
+<If'> : fi , else , 
+<Cond0> : [VarName] , - , [Number] , 
+<SimpleCond> : [VarName] , ( , - , [Number] , 
+<Cond1> : 
+<Cond1'> : eps , 
+<BinOp'> : and , 
+<Cond2> : 
+<Cond2'> : or , eps , 
+<BinOp''> : or , 
+<Comp> : <= , < , = , > , /= , >= , 
+=====================================
+
+============== STEP 7 ===============
+<Program> : begin , 
+<Code> : [VarName] , print , read , for , eps , 
+<InstList> : [VarName] , print , read , for , while , 
+<Instruction> : [VarName] , print , read , for , while , if , 
+<InstList'> : eps , ; , 
+<Assign> : [VarName] , 
+<If> : if , 
+<While> : while , 
+<For> : for , 
+<Print> : print , 
+<Read> : read , 
+<ExprArith> : [VarName] , ( , - , [Number] , 
+<ExprArith0> : [VarName] , ( , [Number] , 
+<ExprArith0'> : eps , * , / , 
+<Op'> : * , / , 
+<ExprArith1> : [VarName] , ( , [Number] , 
+<ExprArith1'> : eps , + , - , 
+<Op''> : + , - , 
+<ExprArith2> : [VarName] , ( , [Number] , 
+<Cond> : [VarName] , not , - , [Number] , 
+<If'> : fi , else , 
+<Cond0> : [VarName] , ( , - , [Number] , 
+<SimpleCond> : [VarName] , ( , - , [Number] , 
+<Cond1> : 
+<Cond1'> : eps , 
+<BinOp'> : and , 
+<Cond2> : 
+<Cond2'> : or , eps , 
+<BinOp''> : or , 
+<Comp> : <= , < , = , > , /= , >= , 
+=====================================
+
+============== STEP 8 ===============
+<Program> : begin , 
+<Code> : [VarName] , print , read , for , eps , while , 
+<InstList> : [VarName] , print , read , for , while , if , 
+<Instruction> : [VarName] , print , read , for , while , if , 
+<InstList'> : eps , ; , 
+<Assign> : [VarName] , 
+<If> : if , 
+<While> : while , 
+<For> : for , 
+<Print> : print , 
+<Read> : read , 
+<ExprArith> : [VarName] , ( , - , [Number] , 
+<ExprArith0> : [VarName] , ( , [Number] , 
+<ExprArith0'> : eps , * , / , 
+<Op'> : * , / , 
+<ExprArith1> : [VarName] , ( , [Number] , 
+<ExprArith1'> : eps , + , - , 
+<Op''> : + , - , 
+<ExprArith2> : [VarName] , ( , [Number] , 
+<Cond> : [VarName] , not , ( , - , [Number] , 
+<If'> : fi , else , 
+<Cond0> : [VarName] , ( , - , [Number] , 
+<SimpleCond> : [VarName] , ( , - , [Number] , 
+<Cond1> : 
+<Cond1'> : eps , 
+<BinOp'> : and , 
+<Cond2> : 
+<Cond2'> : or , eps , 
+<BinOp''> : or , 
+<Comp> : <= , < , = , > , /= , >= , 
+=====================================
+
+============== STEP 9 ===============
+<Program> : begin , 
+<Code> : [VarName] , print , read , for , eps , while , if , 
+<InstList> : [VarName] , print , read , for , while , if , 
+<Instruction> : [VarName] , print , read , for , while , if , 
+<InstList'> : eps , ; , 
+<Assign> : [VarName] , 
+<If> : if , 
+<While> : while , 
+<For> : for , 
+<Print> : print , 
+<Read> : read , 
+<ExprArith> : [VarName] , ( , - , [Number] , 
+<ExprArith0> : [VarName] , ( , [Number] , 
+<ExprArith0'> : eps , * , / , 
+<Op'> : * , / , 
+<ExprArith1> : [VarName] , ( , [Number] , 
+<ExprArith1'> : eps , + , - , 
+<Op''> : + , - , 
+<ExprArith2> : [VarName] , ( , [Number] , 
+<Cond> : [VarName] , not , ( , - , [Number] , 
+<If'> : fi , else , 
+<Cond0> : [VarName] , ( , - , [Number] , 
+<SimpleCond> : [VarName] , ( , - , [Number] , 
+<Cond1> : 
+<Cond1'> : eps , 
+<BinOp'> : and , 
+<Cond2> : 
+<Cond2'> : or , eps , 
+<BinOp''> : or , 
+<Comp> : <= , < , = , > , /= , >= , 
+=====================================
+
+============== STEP 10 ===============
+<Program> : begin , 
+<Code> : [VarName] , print , read , for , eps , while , if , 
+<InstList> : [VarName] , print , read , for , while , if , 
+<Instruction> : [VarName] , print , read , for , while , if , 
+<InstList'> : eps , ; , 
+<Assign> : [VarName] , 
+<If> : if , 
+<While> : while , 
+<For> : for , 
+<Print> : print , 
+<Read> : read , 
+<ExprArith> : [VarName] , ( , - , [Number] , 
+<ExprArith0> : [VarName] , ( , [Number] , 
+<ExprArith0'> : eps , * , / , 
+<Op'> : * , / , 
+<ExprArith1> : [VarName] , ( , [Number] , 
+<ExprArith1'> : eps , + , - , 
+<Op''> : + , - , 
+<ExprArith2> : [VarName] , ( , [Number] , 
+<Cond> : [VarName] , not , ( , - , [Number] , 
+<If'> : fi , else , 
+<Cond0> : [VarName] , ( , - , [Number] , 
+<SimpleCond> : [VarName] , ( , - , [Number] , 
+<Cond1> : 
+<Cond1'> : eps , 
+<BinOp'> : and , 
+<Cond2> : 
+<Cond2'> : or , eps , 
+<BinOp''> : or , 
+<Comp> : <= , < , = , > , /= , >= , 
+=====================================
+
+<Program> : begin , 
+<Code> : [VarName] , print , read , for , eps , while , if , 
+<InstList> : [VarName] , print , read , for , while , if , 
+<Instruction> : [VarName] , print , read , for , while , if , 
+<InstList'> : eps , ; , 
+<Assign> : [VarName] , 
+<If> : if , 
+<While> : while , 
+<For> : for , 
+<Print> : print , 
+<Read> : read , 
+<ExprArith> : [VarName] , ( , - , [Number] , 
+<ExprArith0> : [VarName] , ( , [Number] , 
+<ExprArith0'> : eps , * , / , 
+<Op'> : * , / , 
+<ExprArith1> : [VarName] , ( , [Number] , 
+<ExprArith1'> : eps , + , - , 
+<Op''> : + , - , 
+<ExprArith2> : [VarName] , ( , [Number] , 
+<Cond> : [VarName] , not , ( , - , [Number] , 
+<If'> : fi , else , 
+<Cond0> : [VarName] , ( , - , [Number] , 
+<SimpleCond> : [VarName] , ( , - , [Number] , 
+<Cond1> : 
+<Cond1'> : eps , 
+<BinOp'> : and , 
+<Cond2> : 
+<Cond2'> : or , eps , 
+<BinOp''> : or , 
+<Comp> : <= , < , = , > , /= , >= , 
+\end{lstlisting}
+
+\noindent\rule[0.5ex]{\linewidth}{1pt}
+
+
+\noindent\rule[0.5ex]{\linewidth}{1pt}
+\textbf{2. Calcul des différentes listes Follow}\\
+\noindent\rule[0.5ex]{\linewidth}{1pt}
+
+\begin{lstlisting}[breaklines]
+============== STEP 0 ===============
+<Program> : 
+<Code> : fi , od , else , end , 
+<InstList> : fi , od , else , end , 
+<Instruction> : fi , od , else , end , ; , 
+<InstList'> : fi , od , else , end , 
+<Assign> : fi , od , else , end , ; , 
+<If> : fi , od , else , end , ; , 
+<While> : fi , od , else , end , ; , 
+<For> : fi , od , else , end , ; , 
+<Print> : fi , od , else , end , ; , 
+<Read> : fi , od , else , end , ; , 
+<ExprArith> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<ExprArith0> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<ExprArith0'> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<Op'> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<ExprArith1> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<ExprArith1'> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<Op''> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<ExprArith2> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<Cond> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<If'> : fi , od , else , end , ; , 
+<Cond0> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<SimpleCond> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<Cond1> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<Cond1'> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<BinOp'> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<Cond2> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<Cond2'> : 
+<BinOp''> : [VarName] , not , or , ( , - , [Number] , 
+<Comp> : [VarName] , ( , - , [Number] , 
+=====================================
+
+============== STEP 1 ===============
+<Program> : 
+<Code> : fi , od , else , end , 
+<InstList> : fi , od , else , end , 
+<Instruction> : fi , od , else , end , ; , 
+<InstList'> : fi , od , else , end , 
+<Assign> : fi , od , else , end , ; , 
+<If> : fi , od , else , end , ; , 
+<While> : fi , od , else , end , ; , 
+<For> : fi , od , else , end , ; , 
+<Print> : fi , od , else , end , ; , 
+<Read> : fi , od , else , end , ; , 
+<ExprArith> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<ExprArith0> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<ExprArith0'> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<Op'> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<ExprArith1> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<ExprArith1'> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<Op''> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<ExprArith2> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<Cond> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<If'> : fi , od , else , end , ; , 
+<Cond0> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<SimpleCond> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<Cond1> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<Cond1'> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<BinOp'> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<Cond2> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<Cond2'> : 
+<BinOp''> : [VarName] , not , or , ( , - , [Number] , 
+<Comp> : [VarName] , ( , - , [Number] , 
+=====================================
+
+============== STEP 2 ===============
+<Program> : eps , 
+<Code> : fi , od , else , end , 
+<InstList> : fi , od , else , end , 
+<Instruction> : fi , od , else , end , ; , 
+<InstList'> : fi , od , else , end , 
+<Assign> : fi , od , else , end , ; , 
+<If> : fi , od , else , end , ; , 
+<While> : fi , od , else , end , ; , 
+<For> : fi , od , else , end , ; , 
+<Print> : fi , od , else , end , ; , 
+<Read> : fi , od , else , end , ; , 
+<ExprArith> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<ExprArith0> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<ExprArith0'> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<Op'> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<ExprArith1> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<ExprArith1'> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<Op''> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<ExprArith2> : <= , fi , for , do , while , od , else , by , end , if , [Number] , read , ( , ) , * , + , - , /= , / , [VarName] , print , ; , to , < , = , > , >= , 
+<Cond> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<If'> : fi , od , else , end , ; , 
+<Cond0> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<SimpleCond> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<Cond1> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<Cond1'> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<BinOp'> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<Cond2> : read , fi , or , for , then , do , while , [VarName] , print , od , else , end , ; , if , 
+<Cond2'> : eps , 
+<BinOp''> : [VarName] , not , or , ( , - , [Number] , 
+<Comp> : [VarName] , ( , - , [Number] , 
+=====================================
+\end{lstlisting}
+
+\noindent\rule[0.5ex]{\linewidth}{1pt}
+
+\noindent\rule[0.5ex]{\linewidth}{1pt}
+\textbf{3. Les différentes règles de la grammaire transformée}\\
+\noindent\rule[0.5ex]{\linewidth}{1pt}
+
+\begin{verbatim}
+1 : <Program> -> begin <Code> end 
+2 : <Code> -> eps 
+3 : <Code> -> <InstList> 
+4 : <InstList> -> <Instruction> <InstList'> 
+5 : <InstList'> -> eps 
+6 : <InstList'> -> ; <InstList> 
+7 : <Instruction> -> <Assign> 
+8 : <Instruction> -> <If> 
+9 : <Instruction> -> <While> 
+10 : <Instruction> -> <For> 
+11 : <Instruction> -> <Print> 
+12 : <Instruction> -> <Read> 
+13 : <Assign> -> [VarName] := <ExprArith> 
+14 : <ExprArith> -> - <ExprArith0> 
+15 : <ExprArith> -> <ExprArith0> 
+16 : <ExprArith0'> -> <Op'> <ExprArith> <ExprArith0'> 
+17 : <ExprArith0'> -> eps 
+18 : <ExprArith0> -> <ExprArith1> <ExprArith0'> 
+19 : <ExprArith1'> -> <Op''> <ExprArith> <ExprArith1'> 
+20 : <ExprArith1'> -> eps 
+21 : <ExprArith1> -> <ExprArith2> <ExprArith1'> 
+22 : <ExprArith2> -> [VarName] 
+23 : <ExprArith2> -> [Number] 
+24 : <ExprArith2> -> ( <ExprArith> ) 
+25 : <Op'> -> * 
+26 : <Op'> -> / 
+27 : <Op''> -> + 
+28 : <Op''> -> - 
+29 : <If> -> if <Cond> then <Code> <If'> 
+30 : <If'> -> fi 
+31 : <If'> -> else <Code> fi 
+32 : <Cond> -> not <Cond0> 
+33 : <Cond> -> <Cond0> 
+34 : <Cond0> -> <SimpleCond> 
+35 : <Cond0> -> <Cond1> 
+36 : <Cond1'> -> <BinOp'> <Cond2> <Cond1> 
+37 : <Cond1'> -> eps 
+38 : <Cond1> -> <Cond2> <Cond1'> 
+39 : <Cond2'> -> <BinOp''> <Cond> <Cond2'> 
+40 : <Cond2'> -> eps 
+41 : <SimpleCond> -> <ExprArith> <Comp> <ExprArith> 
+42 : <BinOp'> -> and 
+43 : <BinOp''> -> or 
+44 : <Comp> -> = 
+45 : <Comp> -> >= 
+46 : <Comp> -> > 
+47 : <Comp> -> <= 
+48 : <Comp> -> < 
+49 : <Comp> -> /= 
+50 : <While> -> while <Cond> do <Code> od 
+51 : <For> -> for [VarName] from <ExprArith> by <ExprArith> to <ExprArith> do <Code> od 
+52 : <Print> -> print ( [VarName] ) 
+53 : <Read> -> read ( [VarName] ) 
+\end{verbatim}
+\noindent\rule[0.5ex]{\linewidth}{1pt}
 
 
 \end{document}
