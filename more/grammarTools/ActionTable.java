@@ -86,61 +86,8 @@ public class ActionTable {
 					}
 			}
 			
-			/*
-			HashSet<Token> firstAlpha = firstSet(aRule.getRightSide());
-			for(Token terminal : firstAlpha){
-				System.out.println(terminal.getValue());
-				setRule(aRule.getLeftSide(), terminal, aRule);
-			}
-			
-			if(firstAlpha.contains(epsilon)){
-				for (Token terminal : follow.get(aRule.getLeftSide().getValue()) ) {
-                    // Two production rules for the same M[A,a], the grammar is not LL(1)
-    				setRule(aRule.getLeftSide(), terminal, aRule);
-                }
-			}
-			*/
-			
 		}
 	}
-	
-	/*
-	public HashSet<Token> firstSet(ArrayList<Token> tokenList){
-		
-		HashSet<Token> sum = new HashSet<Token>();
-        if (!tokenList.isEmpty()) {
-            sum.addAll(first.get(tokenList.get(0).getValue()));
-            for (int i = 1; i < tokenList.size(); ++i) {
-                sum.addAll(this.addK1(sum, first.get(tokenList.get(i).getValue())));
-            }
-        }
-        return sum;
-		
-	}
-	
-	private HashSet<Token> addK1(HashSet<Token> l1, HashSet<Token> l2) {
-		HashSet<Token> sumTerminalSetK1 = new HashSet<Token>();
-
-		if (l2.isEmpty()) {
-            sumTerminalSetK1.addAll(l1);
-        } else if (l1.isEmpty()) {
-            sumTerminalSetK1.addAll(l2);
-        } else if (!l1.isEmpty() && !l2.isEmpty()) {
-            for (Token t1 : l1) {
-                for (Token t2 : l2) {                    
-                    if (t1.equals(epsilon)) {
-                    	sumTerminalSetK1.add(t2);
-                    } else {
-                    	sumTerminalSetK1.add(t1);
-                    }
-                }
-
-            }
-        }
-		
-		return sumTerminalSetK1;
-	}
-	*/
 	
 	public void printFirst(){
 		for (Variable var : grammar.getVariables()) {
@@ -163,7 +110,6 @@ public class ActionTable {
 			System.out.println();
 		}
 	}
-		
 
 	private void generateFirst(){
 		// Base :
@@ -348,4 +294,113 @@ public class ActionTable {
         }
         return result;
     }
+
+    public String toLatex() {
+    	/*
+    	 *  Packages required : 
+    	 *  \\usepackage{pdflscape}
+		 *  \\usepackage[a4paper]{geometry}
+		 *  
+    	 */
+    	
+        String result = "";
+        
+        for (ProductionRule productionRule : grammar.getProductionRules()) {
+            result += productionRule.getRuleNumber() +" : " + productionRule.toString() + "\n";
+        }
+        
+
+        result += "\\newgeometry{left=3cm,bottom=0.4cm}\n";        
+        result += "\\begin{center}\n";
+        result += "\t\\begin{landscape}\n";
+        result += "\t\t\\begin{tabular}{|l";
+        
+        for(int i=0; i<grammar.getTerminals().size(); ++i){
+        	result += "|c";
+        }
+        
+        result += "|}\n";
+        result += "\t\t\t\\hline\n\t\t\t &";
+       
+        for (Terminal aTerminal : grammar.getTerminals()) {
+        	if(!aTerminal.equals(epsilon)){
+        		result += "\\parbox[t]{2mm}{\\rotatebox[origin=c]{90}{\\textbf{$"+aTerminal.getValue()+"$}}} &";
+        	}
+        }
+        
+        result = result.substring(0, result.length()-2);
+
+        result += "\\\\ \t\t\t\\hline\n";
+
+        for (Variable aVariable : grammar.getVariables()) {
+        	
+            result += "\t\t\t \\textbf{" + aVariable.getValue().replace("<", "").replace(">", "") + "} &";
+            for (Terminal aTerminal : grammar.getTerminals()) {
+            	if(!aTerminal.equals(epsilon)){
+	                ProductionRule productionRule = matrix.get(aVariable).get(aTerminal);
+	                if (productionRule == null) {
+	                    result += "-" + " & ";
+	                } else {
+	                    result += productionRule.getRuleNumber() + " & ";
+	                }
+            	}
+                
+            }
+            
+            result = result.substring(0, result.length()-2);
+            result += "\\\\ \\hline\n";
+            
+        }
+
+        result += "\t\t\\end{tabular}\n";
+        result += "\t\\end{landscape}\n";
+        result += "\\end{center}\n";
+        result += "\\restoregeometry";
+        
+        return result;
+    }
+    
+	
+	public String firstFollowToLatex(){
+		String result = "";
+		
+		result += "\\begin{center}\n";
+        result += "\t\\begin{tabular}{|l|c|c|}\n";
+        result += "\t\t\\hline\n\t\t\t &";
+        result += "\t\t  \\TitleParBox{\\textbf{First}} & \\TitleParBox{\\textbf{Follow}} \\\\ \\hline\n";
+				
+		for (Variable var : grammar.getVariables()) {
+			result += "\t\t\t \\textbf{" + var.getValue().replace("<", "").replace(">", "") + "} & ";
+			HashSet<Token> tkSet = first.get(var.getValue());
+			result += "\\ContentParBox{";
+			if(tkSet.isEmpty()){
+				result += "- ,";
+			}
+			for (Token tk : tkSet) {
+				result += "$"+tk.getValue()+"$, ";
+			}
+			result = result.substring(0,  result.length()-2);
+			result += "}";
+			
+			result += " & ";
+			
+			tkSet = follow.get(var.getValue());
+			result += "\\ContentParBox{";
+			if(tkSet.isEmpty()){
+				result += "- ,";
+			}
+			for (Token tk : tkSet) {
+				result += "$"+tk.getValue()+"$, ";
+			}
+			result = result.substring(0,  result.length()-2);
+			result += "}";
+			result += "\\\\ \\hline\n";
+		}
+		
+		result += "\t\\end{tabular}\n";
+		result += "\\end{center}\n";
+		
+		return result;
+	}
+		
 }

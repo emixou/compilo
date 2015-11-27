@@ -1,12 +1,18 @@
-\documentclass[pdftex,10pt,a4paper]{article} \usepackage[utf8]{inputenc}
+\documentclass[pdftex,10pt,a4paper]{article} 
+\usepackage[utf8]{inputenc}
 \usepackage[francais]{babel}
 \usepackage{hyperref}
 \usepackage{eurosym}
 \usepackage[a4paper]{geometry}
 \usepackage{graphicx}
+\usepackage{lscape}
+\usepackage{longtable}
+
 
 \geometry{hscale=0.75,vscale=0.80,centering}
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\newcommand*{\TitleParBox}[1]{\parbox[c][1cm]{6cm}{\raggedright \centering #1}}%
+\newcommand*{\ContentParBox}[1]{\parbox[c][2cm]{6cm}{\raggedright #1}}%
 
 
 \begin{document}
@@ -37,12 +43,12 @@
 
 \section{Introduction}
 
-Dans le cadre du cours d'introduction à la théorie du langage et de compilation (INFO-F-403), il a été demandé d'implémenter et d'écrire un compilateur pour le langage SUPRALGOL$^{2016}$, une variante du langage Algol68.\\\\ 
+Dans le cadre du cours d'introduction à la théorie du langage et de compilation (INFO-F-403), il a été demandé d'implémenter et d'écrire un compilateur pour le langage SUPRALGOL$^{2016}$, une variante du langage Algol68.\\
 
 La première partie consistait en la création du scanner. Ce scanner analyse et découpe, ensuite, un code SUPRALGOL$^{2016}$ permettant d'identifier chacun des éléments de ce dernier, et leur correspondance dans ce langage.
-La deuxième partie consistait en la création du parser. Ce parser [\ldots]\\\\
+La deuxième partie consistait en la création du parser. Ce parser permet de détecter les erreurs de syntaxe ne respectant pas la grammaire du langage à l'aide de tous les outils mis à sa disposion. Les différents outils seront énoncés dans le paragraphe suivant. \\
 
-Il fallait, dans un premier temps, transformer la grammaire SUPRALGOL$^{2016}$ afin de la rendre LL(1). Quatre étapes sont nécessaires à cette transformation : la suppression des symboles inutiles, la suppression de la récursivité à gauche, la factorisation des règles, ainsi que la prise en compte de la priorité et l'associativité des opérateurs pour rendre la grammaire non-ambigüe.\\ Sur base de cette nouvelle grammaire et quelques manipulations, une \textit{action table} a pu être créée, rendant possible l'exécution du parser LL(1) qu'il a été demandé de réaliser.\\\\
+Il fallait, dans un premier temps, transformer la grammaire SUPRALGOL$^{2016}$ afin de la rendre LL(1). Quatre étapes sont nécessaires à cette transformation : la suppression des symboles inutiles, la suppression de la récursivité à gauche, la factorisation des règles, ainsi que la prise en compte de la priorité et l'associativité des opérateurs pour rendre la grammaire non-ambigüe.\\ Sur base de cette nouvelle grammaire et quelques manipulations, une \textit{action table} a pu être créée, rendant possible l'exécution du parser LL(1) qu'il a été demandé de réaliser.\\
 
 Etant donné la demande de justificatifs des différentes étapes, l'attention a été portée sur l'implémentation des différents algorithmes en vue de l'obtention des réponses les plus adéquates. Dans la suite de ce rapport, seront expliqué les différentes opérations, ainsi que les résultats ayant pu être obtenus grâce à ces dernières.
 
@@ -63,9 +69,102 @@ La récursivité à gauche est un problème pour le «\textit{Top-Down parsing}�
 \subsection{Factorisation à gauche}
 Pour les «\textit{Top-Down parsing}», chacunes des règles de la grammaire doit être factorisées à gauche. Comme pour le point précédent sur la recursivité, l'introduction d'une nouvelle variable est nécessaire. Cette étape consiste à rassembler les différents terminaux, ayant un préfixe commun (différent de $\epsilon$), d'une variable, dans cette nouvelle variable recemment introduite. Cela enlève une ambigüité et permet au parser de savoir directement quelle règle choisir sans devoir toutes les parcourir.
 
-\section{Action table}
+\section{Table d'action}
 
-Comme mentionné dans l'introduction, la construction d'une table d'action est nécessaire au bon fonctionnement du parser. Pour chaque symbole, le parseur doit savoir deux choses sur ce dernier : \textit{First(X)} et \textit{Follow(X)} où X est le symbole. La grammaire étant de type LL(1), les différents algorithmes faisant présence d'un ordre de grandeur \textit{k} se le voient attribué à 1. \textit{First} est donc l'ensemble des premiers terminaux (vecteur d'un seul terminal) rencontré pouvant commencer un mot généré à partir d'une variable. \textit{Follow} s'applique pour les terminaux qui suivent le mot. Sur base de ces deux vecteurs , la table d'action peut être construite.
+Comme mentionné dans l'introduction, la construction d'une table d'action est nécessaire au bon fonctionnement du parser. Pour chaque symbole, le parseur doit savoir deux choses sur ce dernier : \textit{First(X)} et \textit{Follow(X)} où X est le symbole. La grammaire étant de type LL(1), les différents algorithmes faisant présence d'un ordre de grandeur \textit{k} se le voient attribué à 1. \textit{First} est donc l'ensemble des premiers terminaux (vecteur d'un seul terminal) rencontré pouvant commencer un mot généré à partir d'une variable. \textit{Follow} s'applique pour les terminaux qui suivent le mot. Sur base de ces deux vecteurs , la table d'action peut être construite. L'action table permet donc au parseur de faire la liaison, entre les variables et les terminaux, en indiquant le numéro de la règle qui permet cette dernière.
+
+\subsection{Valeur de First et Follow}
+
+Les différentes étapes permettant d'obtenir ces resultats sont proposées en annexe. Ces étapes ont été réalisées sur base des algorithmes présents dans les slides du cours.
+
+\begin{center}
+	%\begin{longtable}{|p.|c|c|}
+	\begin{longtable}{| p{.20\textwidth} | p{.40\textwidth} | p{.40\textwidth} |}
+		\hline
+			 &		  \TitleParBox{\textbf{First}} & \TitleParBox{\textbf{Follow}} \\ \hline
+			 \textbf{Program} & \ContentParBox{$begin$} & \ContentParBox{$eps$}\\ \hline
+			 \textbf{Code} & \ContentParBox{$[VarName]$, $print$, $read$, $for$, $eps$, $while$, $if$} & \ContentParBox{$fi$, $od$, $else$, $end$}\\ \hline
+			 \textbf{InstList} & \ContentParBox{$[VarName]$, $print$, $read$, $for$, $while$, $if$} & \ContentParBox{$fi$, $od$, $else$, $end$}\\ \hline
+			 \textbf{Instruction} & \ContentParBox{$[VarName]$, $print$, $read$, $for$, $while$, $if$} & \ContentParBox{$fi$, $od$, $else$, $end$, $;$}\\ \hline
+			 \textbf{InstList'} & \ContentParBox{$eps$, $;$} & \ContentParBox{$fi$, $od$, $else$, $end$}\\ \hline
+			 \textbf{Assign} & \ContentParBox{$[VarName]$} & \ContentParBox{$fi$, $od$, $else$, $end$, $;$}\\ \hline
+			 \textbf{If} & \ContentParBox{$if$} & \ContentParBox{$fi$, $od$, $else$, $end$, $;$}\\ \hline
+			 \textbf{While} & \ContentParBox{$while$} & \ContentParBox{$fi$, $od$, $else$, $end$, $;$}\\ \hline
+			 \textbf{For} & \ContentParBox{$for$} & \ContentParBox{$fi$, $od$, $else$, $end$, $;$}\\ \hline
+			 \textbf{Print} & \ContentParBox{$print$} & \ContentParBox{$fi$, $od$, $else$, $end$, $;$}\\ \hline
+			 \textbf{Read} & \ContentParBox{$read$} & \ContentParBox{$fi$, $od$, $else$, $end$, $;$}\\ \hline
+			 \textbf{ExprArith} & \ContentParBox{$[VarName]$, $($, $-$, $[Number]$} & \ContentParBox{$<=$, $fi$, $for$, $do$, $while$, $od$, $else$, $by$, $end$, $if$, $[Number]$, $read$, $($, $)$, $*$, $+$, $-$, $/=$, $/$, $[VarName]$, $print$, $;$, $to$, $<$, $=$, $>$, $>=$}\\ \hline
+			 \textbf{ExprArith0} & \ContentParBox{$[VarName]$, $($, $[Number]$} & \ContentParBox{$<=$, $fi$, $for$, $do$, $while$, $od$, $else$, $by$, $end$, $if$, $[Number]$, $read$, $($, $)$, $*$, $+$, $-$, $/=$, $/$, $[VarName]$, $print$, $;$, $to$, $<$, $=$, $>$, $>=$}\\ \hline
+			 \textbf{ExprArith0'} & \ContentParBox{$eps$, $*$, $/$} & \ContentParBox{$<=$, $fi$, $for$, $do$, $while$, $od$, $else$, $by$, $end$, $if$, $[Number]$, $read$, $($, $)$, $*$, $+$, $-$, $/=$, $/$, $[VarName]$, $print$, $;$, $to$, $<$, $=$, $>$, $>=$}\\ \hline
+			 \textbf{Op'} & \ContentParBox{$*$, $/$} & \ContentParBox{$<=$, $fi$, $for$, $do$, $while$, $od$, $else$, $by$, $end$, $if$, $[Number]$, $read$, $($, $)$, $*$, $+$, $-$, $/=$, $/$, $[VarName]$, $print$, $;$, $to$, $<$, $=$, $>$, $>=$}\\ \hline
+			 \textbf{ExprArith1} & \ContentParBox{$[VarName]$, $($, $[Number]$} & \ContentParBox{$<=$, $fi$, $for$, $do$, $while$, $od$, $else$, $by$, $end$, $if$, $[Number]$, $read$, $($, $)$, $*$, $+$, $-$, $/=$, $/$, $[VarName]$, $print$, $;$, $to$, $<$, $=$, $>$, $>=$}\\ \hline
+			 \textbf{ExprArith1'} & \ContentParBox{$eps$, $+$, $-$} & \ContentParBox{$<=$, $fi$, $for$, $do$, $while$, $od$, $else$, $by$, $end$, $if$, $[Number]$, $read$, $($, $)$, $*$, $+$, $-$, $/=$, $/$, $[VarName]$, $print$, $;$, $to$, $<$, $=$, $>$, $>=$}\\ \hline
+			 \textbf{Op''} & \ContentParBox{$+$, $-$} & \ContentParBox{$<=$, $fi$, $for$, $do$, $while$, $od$, $else$, $by$, $end$, $if$, $[Number]$, $read$, $($, $)$, $*$, $+$, $-$, $/=$, $/$, $[VarName]$, $print$, $;$, $to$, $<$, $=$, $>$, $>=$}\\ \hline
+			 \textbf{ExprArith2} & \ContentParBox{$[VarName]$, $($, $[Number]$} & \ContentParBox{$<=$, $fi$, $for$, $do$, $while$, $od$, $else$, $by$, $end$, $if$, $[Number]$, $read$, $($, $)$, $*$, $+$, $-$, $/=$, $/$, $[VarName]$, $print$, $;$, $to$, $<$, $=$, $>$, $>=$}\\ \hline
+			 \textbf{Cond} & \ContentParBox{$[VarName]$, $not$, $($, $-$, $[Number]$} & \ContentParBox{$read$, $fi$, $or$, $for$, $then$, $do$, $while$, $[VarName]$, $print$, $od$, $else$, $end$, $;$, $if$}\\ \hline
+			 \textbf{If'} & \ContentParBox{$fi$, $else$} & \ContentParBox{$fi$, $od$, $else$, $end$, $;$}\\ \hline
+			 \textbf{Cond0} & \ContentParBox{$[VarName]$, $($, $-$, $[Number]$} & \ContentParBox{$read$, $fi$, $or$, $for$, $then$, $do$, $while$, $[VarName]$, $print$, $od$, $else$, $end$, $;$, $if$}\\ \hline
+			 \textbf{SimpleCond} & \ContentParBox{$[VarName]$, $($, $-$, $[Number]$} & \ContentParBox{$read$, $fi$, $or$, $for$, $then$, $do$, $while$, $[VarName]$, $print$, $od$, $else$, $end$, $;$, $if$}\\ \hline
+			 \textbf{Cond1} & \ContentParBox{-} & \ContentParBox{$read$, $fi$, $or$, $for$, $then$, $do$, $while$, $[VarName]$, $print$, $od$, $else$, $end$, $;$, $if$}\\ \hline
+			 \textbf{Cond1'} & \ContentParBox{$eps$} & \ContentParBox{$read$, $fi$, $or$, $for$, $then$, $do$, $while$, $[VarName]$, $print$, $od$, $else$, $end$, $;$, $if$}\\ \hline
+			 \textbf{BinOp'} & \ContentParBox{$and$} & \ContentParBox{$read$, $fi$, $or$, $for$, $then$, $do$, $while$, $[VarName]$, $print$, $od$, $else$, $end$, $;$, $if$}\\ \hline
+			 \textbf{Cond2} & \ContentParBox{-} & \ContentParBox{$read$, $fi$, $or$, $for$, $then$, $do$, $while$, $[VarName]$, $print$, $od$, $else$, $end$, $;$, $if$}\\ \hline
+			 \textbf{Cond2'} & \ContentParBox{$or$, $eps$} & \ContentParBox{$eps$}\\ \hline
+			 \textbf{BinOp''} & \ContentParBox{$or$} & \ContentParBox{$[VarName]$, $not$, $or$, $($, $-$, $[Number]$}\\ \hline
+			 \textbf{Comp} & \ContentParBox{$<=$, $<$, $=$, $>$, $/=$, $>=$} & \ContentParBox{$[VarName]$, $($, $-$, $[Number]$}\\ \hline
+	\end{longtable}
+\end{center}
+
+
+\subsection{Résultats}
+\begin{center}
+	\begin{landscape}
+	\resizebox{1.6\textwidth}{!}{ 
+		\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+			\hline
+			 &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$begin$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$end$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$;$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$[VarName]$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$:=$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$-$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$[Number]$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$($}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$)$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$*$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$/$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$+$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$if$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$then$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$fi$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$else$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$not$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$and$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$or$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$=$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$>=$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$>$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$<=$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$<$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$/=$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$while$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$do$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$od$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$for$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$from$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$by$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$to$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$print$}}} &\parbox[t]{2mm}{\rotatebox[origin=c]{90}{\textbf{$read$}}}\\ 			\hline
+			 \textbf{Program} &1 & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{Code} &- & 2 & - & 3 & - & - & - & - & - & - & - & - & 3 & - & 2 & 2 & - & - & - & - & - & - & - & - & - & 3 & - & 2 & 3 & - & - & - & 3 & 3 \\ \hline
+			 \textbf{InstList} &- & - & - & 4 & - & - & - & - & - & - & - & - & 4 & - & - & - & - & - & - & - & - & - & - & - & - & 4 & - & - & 4 & - & - & - & 4 & 4 \\ \hline
+			 \textbf{Instruction} &- & - & - & 7 & - & - & - & - & - & - & - & - & 8 & - & - & - & - & - & - & - & - & - & - & - & - & 9 & - & - & 10 & - & - & - & 11 & 12 \\ \hline
+			 \textbf{InstList'} &- & 5 & 6 & - & - & - & - & - & - & - & - & - & - & - & 5 & 5 & - & - & - & - & - & - & - & - & - & - & - & 5 & - & - & - & - & - & - \\ \hline
+			 \textbf{Assign} &- & - & - & 13 & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{If} &- & - & - & - & - & - & - & - & - & - & - & - & 29 & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{While} &- & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & 50 & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{For} &- & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & 51 & - & - & - & - & - \\ \hline
+			 \textbf{Print} &- & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & 52 & - \\ \hline
+			 \textbf{Read} &- & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & 53 \\ \hline
+			 \textbf{ExprArith} &- & - & - & 15 & - & 14 & 15 & 15 & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{ExprArith0} &- & - & - & 18 & - & - & 18 & 18 & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{ExprArith0'} &- & 17 & 17 & 17 & - & 17 & 17 & 17 & 17 & 16 & 16 & 17 & 17 & - & 17 & 17 & - & - & - & 17 & 17 & 17 & 17 & 17 & 17 & 17 & 17 & 17 & 17 & - & 17 & 17 & 17 & 17 \\ \hline
+			 \textbf{Op'} &- & - & - & - & - & - & - & - & - & 25 & 26 & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{ExprArith1} &- & - & - & 21 & - & - & 21 & 21 & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{ExprArith1'} &- & 20 & 20 & 20 & - & 19 & 20 & 20 & 20 & 20 & 20 & 19 & 20 & - & 20 & 20 & - & - & - & 20 & 20 & 20 & 20 & 20 & 20 & 20 & 20 & 20 & 20 & - & 20 & 20 & 20 & 20 \\ \hline
+			 \textbf{Op''} &- & - & - & - & - & 28 & - & - & - & - & - & 27 & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{ExprArith2} &- & - & - & 22 & - & - & 23 & 24 & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{Cond} &- & - & - & 33 & - & 33 & 33 & 33 & - & - & - & - & - & - & - & - & 32 & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{If'} &- & - & - & - & - & - & - & - & - & - & - & - & - & - & 30 & 31 & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{Cond0} &- & - & - & 34 & - & 34 & 34 & 34 & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{SimpleCond} &- & - & - & 41 & - & 41 & 41 & 41 & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{Cond1} &- & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{Cond1'} &- & 37 & 37 & 37 & - & - & - & - & - & - & - & - & 37 & 37 & 37 & 37 & - & 36 & 37 & - & - & - & - & - & - & 37 & 37 & 37 & 37 & - & - & - & 37 & 37 \\ \hline
+			 \textbf{BinOp'} &- & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & 42 & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{Cond2} &- & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{Cond2'} &- & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & 39 & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{BinOp''} &- & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & 43 & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - \\ \hline
+			 \textbf{Comp} &- & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & - & 44 & 45 & 46 & 47 & 48 & 49 & - & - & - & - & - & - & - & - & - \\ \hline
+		\end{tabular}
+	}
+	\end{landscape}
+\end{center}
+
+\section{Conclusion}
+
+L'implémentation des différents algorithmes n'a pas été une tache facile. Certaines opérations et vérifications ne sont pas, toujours, entièrement décrites dans les slides. Cette implémentation n'est donc sûrement pas parfaite. Plusieurs tests ont été effectués et ont pointé de nombreuses erreurs, qui ont pu être corrigées par la suite. Cependant, pour les recommandations du projet, les résultats ont l'air dans l'ensemble corrects.\\
+
+Lors de la précédente itération, le rapport avait été quelqu'un peu négligé et cela s'était ressenti. C'est donc pour cela que celui-ci a été mieux préparé, et realisé de la manière la plus claire possible.
+
+\section{Annexe}
 
 
 \end{document}

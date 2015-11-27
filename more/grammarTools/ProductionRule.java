@@ -69,4 +69,14 @@ public class ProductionRule {
         return result;
 	}
 	
+	public String toLatex(){
+		String result = "";
+		
+		result+= this.getLeftSide().getValue()+" \t\t \\rightarrow \t ";
+		for (Token aToken : this.getRightSide() ) {
+			result+= aToken.getValue()+" ";
+		}
+		
+		return result;
+	}
 }
