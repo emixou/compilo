@@ -43,7 +43,6 @@ public class ActionTable {
             matrix.put(aVariable, new HashMap<Terminal, ProductionRule>());
             for (Terminal terminal : this.grammar.getTerminals()) {
     			if(!terminal.equals(epsilon)){
-    				//matrix.get(aVariable).put(terminal, null);
     				setRule(aVariable, terminal, null);
     			}
             }
@@ -74,10 +73,8 @@ public class ActionTable {
 								setRule(A, anToken, aRule);
 							}
 						}	
-						
 					}
 			}
-			
 		}
 	}
 	
@@ -123,7 +120,7 @@ public class ActionTable {
 		//Induction : loop until stabilisation (no more changes)
 		boolean isStabilized;
 		
-		int i = 0;
+		//int i = 0;
 		
 		do{
 			isStabilized = true;
@@ -169,7 +166,7 @@ public class ActionTable {
 		//Induction : loop until stabilisation (no more changes)
 		boolean isStabilized;
 		
-		int i = 0;
+		//int i = 0;
 		
 		do{
 			isStabilized = true;
@@ -209,7 +206,6 @@ public class ActionTable {
 									}else{
 										finalTokenSet.add(tokenFirst);
 									}
-									
 								}
 							}
 						}
