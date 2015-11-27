@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/W32TeX) (preloaded format=pdflatex 2015.11.27)  27 NOV 2015 18:57
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/W32TeX) (preloaded format=pdflatex 2015.11.27)  27 NOV 2015 19:25
 entering extended mode
  restricted \write18 enabled.
  Source specials enabled.
@@ -848,92 +848,77 @@ Underfull \hbox (badness 10000) in paragraph at lines 165--166
 
  []
 
-<./annexes/algoGrammar.pdf, id=89, 597.23125pt x 845.1575pt>
-File: ./annexes/algoGrammar.pdf Graphic file (type pdf)
-
-<use ./annexes/algoGrammar.pdf>
-Package pdftex.def Info: ./annexes/algoGrammar.pdf used on input line 177.
+<./algoGrammar.pdf, id=89, 597.23125pt x 845.1575pt>
+File: ./algoGrammar.pdf Graphic file (type pdf)
+ <use ./algoGrammar.pdf>
+Package pdftex.def Info: ./algoGrammar.pdf used on input line 177.
 (pdftex.def)             Requested size: 597.22978pt x 845.15544pt.
-File: ./annexes/algoGrammar.pdf Graphic file (type pdf)
- <use ./annexes/algoGrammar.pdf>
-Package pdftex.def Info: ./annexes/algoGrammar.pdf used on input line 177.
+File: ./algoGrammar.pdf Graphic file (type pdf)
+
+<use ./algoGrammar.pdf>
+Package pdftex.def Info: ./algoGrammar.pdf used on input line 177.
 (pdftex.def)             Requested size: 597.22978pt x 845.15544pt.
 
-<./annexes/algoGrammar.pdf, id=92, page=1, 597.23125pt x 845.1575pt>
-File: ./annexes/algoGrammar.pdf Graphic file (type pdf)
+<./algoGrammar.pdf, id=92, page=1, 597.23125pt x 845.1575pt>
+File: ./algoGrammar.pdf Graphic file (type pdf)
 
-<use ./annexes/algoGrammar.pdf, page 1>
-Package pdftex.def Info: ./annexes/algoGrammar.pdf, page1 used on input line 17
-7.
+<use ./algoGrammar.pdf, page 1>
+Package pdftex.def Info: ./algoGrammar.pdf, page1 used on input line 177.
 (pdftex.def)             Requested size: 597.22978pt x 845.15544pt.
-File: ./annexes/algoGrammar.pdf Graphic file (type pdf)
-
-<use ./annexes/algoGrammar.pdf, page 1>
-Package pdftex.def Info: ./annexes/algoGrammar.pdf, page1 used on input line 17
-7.
+File: ./algoGrammar.pdf Graphic file (type pdf)
+ <use ./algoGrammar.pdf, page 1>
+Package pdftex.def Info: ./algoGrammar.pdf, page1 used on input line 177.
 (pdftex.def)             Requested size: 597.25711pt x 845.19412pt.
  [7
 
 ]
-File: ./annexes/algoGrammar.pdf Graphic file (type pdf)
+File: ./algoGrammar.pdf Graphic file (type pdf)
 
-<use ./annexes/algoGrammar.pdf, page 1>
-Package pdftex.def Info: ./annexes/algoGrammar.pdf, page1 used on input line 17
-7.
+<use ./algoGrammar.pdf, page 1>
+Package pdftex.def Info: ./algoGrammar.pdf, page1 used on input line 177.
 (pdftex.def)             Requested size: 597.25711pt x 845.19412pt.
-File: ./annexes/algoGrammar.pdf Graphic file (type pdf)
+File: ./algoGrammar.pdf Graphic file (type pdf)
+ <use ./algoGrammar.pdf, page 1>
+Package pdftex.def Info: ./algoGrammar.pdf, page1 used on input line 177.
+(pdftex.def)             Requested size: 597.25711pt x 845.19412pt.
+File: ./algoGrammar.pdf Graphic file (type pdf)
 
-<use ./annexes/algoGrammar.pdf, page 1>
-Package pdftex.def Info: ./annexes/algoGrammar.pdf, page1 used on input line 17
-7.
+<use ./algoGrammar.pdf, page 1>
+Package pdftex.def Info: ./algoGrammar.pdf, page1 used on input line 177.
 (pdftex.def)             Requested size: 597.25711pt x 845.19412pt.
-File: ./annexes/algoGrammar.pdf Graphic file (type pdf)
+ [8 <./algoGrammar.pdf>]
+<./algoGrammar.pdf, id=133, page=2, 597.23125pt x 845.1575pt>
+File: ./algoGrammar.pdf Graphic file (type pdf)
 
-<use ./annexes/algoGrammar.pdf, page 1>
-Package pdftex.def Info: ./annexes/algoGrammar.pdf, page1 used on input line 17
-7.
+<use ./algoGrammar.pdf, page 2>
+Package pdftex.def Info: ./algoGrammar.pdf, page2 used on input line 177.
 (pdftex.def)             Requested size: 597.25711pt x 845.19412pt.
- [8 <./annexes/algoGrammar.pdf>]
-<./annexes/algoGrammar.pdf, id=133, page=2, 597.23125pt x 845.1575pt>
-File: ./annexes/algoGrammar.pdf Graphic file (type pdf)
+File: ./algoGrammar.pdf Graphic file (type pdf)
+ <use ./algoGrammar.pdf, page 2>
+Package pdftex.def Info: ./algoGrammar.pdf, page2 used on input line 177.
+(pdftex.def)             Requested size: 597.25711pt x 845.19412pt.
+File: ./algoGrammar.pdf Graphic file (type pdf)
 
-<use ./annexes/algoGrammar.pdf, page 2>
-Package pdftex.def Info: ./annexes/algoGrammar.pdf, page2 used on input line 17
-7.
+<use ./algoGrammar.pdf, page 2>
+Package pdftex.def Info: ./algoGrammar.pdf, page2 used on input line 177.
 (pdftex.def)             Requested size: 597.25711pt x 845.19412pt.
-File: ./annexes/algoGrammar.pdf Graphic file (type pdf)
+ [9 <./algoGrammar.pdf>]
+<./algoGrammar.pdf, id=139, page=3, 597.23125pt x 845.1575pt>
+File: ./algoGrammar.pdf Graphic file (type pdf)
 
-<use ./annexes/algoGrammar.pdf, page 2>
-Package pdftex.def Info: ./annexes/algoGrammar.pdf, page2 used on input line 17
-7.
+<use ./algoGrammar.pdf, page 3>
+Package pdftex.def Info: ./algoGrammar.pdf, page3 used on input line 177.
 (pdftex.def)             Requested size: 597.25711pt x 845.19412pt.
-File: ./annexes/algoGrammar.pdf Graphic file (type pdf)
+File: ./algoGrammar.pdf Graphic file (type pdf)
+ <use ./algoGrammar.pdf, page 3>
+Package pdftex.def Info: ./algoGrammar.pdf, page3 used on input line 177.
+(pdftex.def)             Requested size: 597.25711pt x 845.19412pt.
+File: ./algoGrammar.pdf Graphic file (type pdf)
 
-<use ./annexes/algoGrammar.pdf, page 2>
-Package pdftex.def Info: ./annexes/algoGrammar.pdf, page2 used on input line 17
-7.
+<use ./algoGrammar.pdf, page 3>
+Package pdftex.def Info: ./algoGrammar.pdf, page3 used on input line 177.
 (pdftex.def)             Requested size: 597.25711pt x 845.19412pt.
- [9 <./annexes/algoGrammar.pdf>]
-<./annexes/algoGrammar.pdf, id=139, page=3, 597.23125pt x 845.1575pt>
-File: ./annexes/algoGrammar.pdf Graphic file (type pdf)
-
-<use ./annexes/algoGrammar.pdf, page 3>
-Package pdftex.def Info: ./annexes/algoGrammar.pdf, page3 used on input line 17
-7.
-(pdftex.def)             Requested size: 597.25711pt x 845.19412pt.
-File: ./annexes/algoGrammar.pdf Graphic file (type pdf)
-
-<use ./annexes/algoGrammar.pdf, page 3>
-Package pdftex.def Info: ./annexes/algoGrammar.pdf, page3 used on input line 17
-7.
-(pdftex.def)             Requested size: 597.25711pt x 845.19412pt.
-File: ./annexes/algoGrammar.pdf Graphic file (type pdf)
-
-<use ./annexes/algoGrammar.pdf, page 3>
-Package pdftex.def Info: ./annexes/algoGrammar.pdf, page3 used on input line 17
-7.
-(pdftex.def)             Requested size: 597.25711pt x 845.19412pt.
- [10 <./annexes/algoGrammar.pdf>]
+ [10 <./algoGrammar.pdf>]
 Overfull \hbox (8.61511pt too wide) in paragraph at lines 241--241
 []\OT1/cmtt/m/n/10 51 : <For> -> for [VarName] from <ExprArith> by <ExprArith> 
 to <ExprArith> do <Code> od[] 
@@ -968,8 +953,8 @@ Package rerunfilecheck Info: File `rapport-partie2.out' has not changed.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 757.
  ) 
 Here is how much of TeX's memory you used:
- 10234 strings out of 493054
- 146456 string characters out of 6137880
+ 10233 strings out of 493054
+ 146342 string characters out of 6137880
  667687 words of memory out of 5000000
  13128 multiletter control sequences out of 15000+600000
  7181 words of font info for 26 fonts, out of 8000000 for 9000
@@ -985,7 +970,7 @@ e1/public/amsfonts/cm/cmr12.pfb><d:/Tools/texlive/texmf-dist/fonts/type1/public
 cm/cmsy10.pfb><d:/Tools/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5
 .pfb><d:/Tools/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb><d:
 /Tools/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on rapport-partie2.pdf (23 pages, 547302 bytes).
+Output written on rapport-partie2.pdf (23 pages, 547273 bytes).
 PDF statistics:
  843 PDF objects out of 1000 (max. 8388607)
  780 compressed objects within 8 object streams
