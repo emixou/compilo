@@ -28,7 +28,10 @@ public class Parser {
 		
 		actionTable = new ActionTable(grammar);
 		actionTable.build();
-		System.out.println(actionTable.toString());
+
+		System.out.println(actionTable.toLatex());
+		System.out.println(actionTable.firstFollowToLatex());
+		
 		scanner = new LexicalAnalyzer(program);
 	}
 	
@@ -46,14 +49,14 @@ public class Parser {
 				head = new Terminal(scanner.nextToken());
 				top = stack.pop();
 			}else if (!grammar.isTerminal(top) && actionTable.getRule(top,head)!= null) {
-				System.out.println("Rule : "+actionTable.getRule(top,head).getRuleNumber()+" "+actionTable.getRule(top,head).toString());
+				//System.out.println("Rule : "+actionTable.getRule(top,head).getRuleNumber()+" "+actionTable.getRule(top,head).toString());
 				produce(actionTable.getRule(top,head));
 				top = stack.pop();
 			} else if (head.getValue().equals("eps") && stack.isEmpty()) {
-				accept();
+				//accept();
 				break;
 			} else {
-				error();
+				//error();
 				break;
 			}
 		}
@@ -61,7 +64,7 @@ public class Parser {
 	}
 	
 	private void produce(ProductionRule aRule) {
-		System.out.println("Produce");
+		//System.out.println("Produce");
 		ArrayList<Token> tokens = aRule.getRightSide();
 		for (int i=tokens.size()-1; i>-1 ;--i) {
 			if (!tokens.get(i).getValue().equals("eps")) {
