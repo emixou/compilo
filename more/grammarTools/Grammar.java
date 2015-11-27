@@ -25,15 +25,8 @@ public class Grammar {
  
 	public Grammar(String fileName) {
 	    try {
-	    	BufferedReader reader;
-	    	if (getClass().getResource("Grammar.class").toString().startsWith("file:/")) {
-	    		reader = new BufferedReader(new FileReader(fileName));
-	    	} else {
-	    		//String path = getClass().getResource("/")+"../more/grammar/supralgol-v2.grammar";
-	    		//System.out.println(path);
-	    		//reader = new BufferedReader(new FileReader(path));
-	    		reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("more/" + fileName)));
-	    	}
+	    	BufferedReader reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/"+fileName)));
+	    	
 	    	String line;
 	    	productionRules = new ArrayList<ProductionRule>();
 	    	terminals = new ArrayList<Terminal>();

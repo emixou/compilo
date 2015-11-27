@@ -14,4 +14,10 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<variableList>
+		<variable>
+			<name>grammar</name>
+			<value>file:/Users/julianschembri/Cours/Lang%20Theory%20&amp;%20Compiling/Projet%20part%202/more/grammar/supralgol-v2.grammar</value>
+		</variable>
+	</variableList>
 </projectDescription>

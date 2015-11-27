@@ -9,10 +9,10 @@ import scanner.SyntaxErrorException;
 public class Main {
 
 	public static void main(String[] args) throws PatternSyntaxException, IOException, SyntaxErrorException {
-		if (args.length != 2) {
-            System.out.println("L'utilisation est : java -jar part2.jar Main SuprAlgolFile");
+		if (args.length != 1) {
+            System.out.println("L'utilisation est : java -jar part2.jar SuprAlgolFile");
         } else {
-			Parser p = new Parser("more/grammar/supralgol-v2.grammar", new java.io.FileReader(args[1]));
+			Parser p = new Parser("supralgol-v2.grammar", new java.io.FileReader(args[0]));
 			p.parse();
         }
 		
