@@ -1,6 +1,7 @@
 <Program> -> begin <Code> end
 <Code> -> eps | <InstList>
-<InstList> -> <Instruction> | <Instruction> ; <InstList>
+<InstList> -> <Instruction> <InstList'>
+<InstList'> -> eps | ; <InstList>
 <Instruction> -> <Assign> | <If> | <While> | <For> | <Print> | <Read>
 <Assign> -> [VarName] := <ExprArith>
 <ExprArith> -> [VarName] | [Number] | ( <ExprArith> ) | <ExprArith0>
