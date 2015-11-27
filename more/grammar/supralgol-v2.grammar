@@ -3,14 +3,14 @@
 <InstList> -> <Instruction> | <Instruction> ; <InstList>
 <Instruction> -> <Assign> | <If> | <While> | <For> | <Print> | <Read>
 <Assign> -> [VarName] := <ExprArith>
-<ExprArith> -> - <ExprArith0> | <ExprArith0>
-<ExprArith0'> -> <Op'> <ExprArith1> <ExprArith0'> | eps
+<ExprArith> -> [VarName] | [Number] | ( <ExprArith> ) | <ExprArith0>
+<ExprArith0'> -> <Op'> <ExprArith> <ExprArith0'> | eps
 <ExprArith0> -> <ExprArith1> <ExprArith0'>
-<ExprArith1'> ->  <Op''> <ExprArith2> <ExprArith1'> | eps
+<ExprArith1'> ->  <Op''> <ExprArith> <ExprArith1'> | eps
 <ExprArith1> ->  <ExprArith2> <ExprArith1'>
-<ExprArith2> -> [VarName] | [Number] | ( <ExprArith> )
-<Op'> -> * | /
-<Op''> -> + | -
+<ExprArith2> -> - <ExprArith> |
+<Op'> -> + | -
+<Op''> -> * | /
 <If> -> if <Cond> then <Code> <If'>
 <If'> -> fi | else <Code> fi
 <Cond> -> not <Cond0> | <Cond0>
