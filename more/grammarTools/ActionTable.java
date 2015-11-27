@@ -1,6 +1,7 @@
 package grammarTools;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -26,6 +27,10 @@ public class ActionTable {
 		return matrix.get(aVariable).get(aTerminal);
 	}
 	
+	public void setRule(Token aVariable, Token aTerminal, ProductionRule rule){
+		matrix.get(aVariable).put((Terminal) aTerminal, rule);
+	}
+	
 	public void build(){
 		
 		this.generateFirst();
@@ -36,6 +41,7 @@ public class ActionTable {
 		
 		//Lets browse the rules lists
 		this.initiliazeTable();
+		System.out.println(toString());
 		this.generateActionTable();
 		
 	}
@@ -44,31 +50,97 @@ public class ActionTable {
 		for (Variable aVariable : this.grammar.getVariables()) {
             matrix.put(aVariable, new HashMap<Terminal, ProductionRule>());
             for (Terminal terminal : this.grammar.getTerminals()) {
-                matrix.get(aVariable).put(terminal, null);
+    			if(!terminal.equals(epsilon)){
+    				//matrix.get(aVariable).put(terminal, null);
+    				setRule(aVariable, terminal, null);
+    			}
             }
 		}		
 	}
 	
 	public void generateActionTable(){
 		for(ProductionRule aRule : grammar.getProductionRules()){
-			//for(Token rightPart : aRule.getRightSide()){
-			for(int i = 0; i < aRule.getRightSide().size(); ++i){
-				
-				HashSet<Token> firstAlpha = first.get(aRule.getRightSide().get(i).getValue());				
-				for(Token aToken : firstAlpha){
-					matrix.get(aRule.getLeftSide()).put((Terminal) aToken, aRule);
-				}		
-						
-				if(firstAlpha.contains(epsilon)){
-					HashSet<Token> followA = follow.get(aRule.getLeftSide().getValue());	
-					for (Token aToken : followA){
-						matrix.get(aRule.getLeftSide()).put((Terminal) aToken, aRule);
-					}
+			int i=0;
+			
+			Variable A = aRule.getLeftSide();
+			//a = firstAlpha
+			HashSet<Token> firstAlpha = first.get(aRule.getRightSide().get(i).getValue());	
+			for(Token a : firstAlpha){
+				if(!a.equals(epsilon)){
+					setRule(A, a, aRule);
 				}
-			}
 				
+			}				
+			
+			//followA
+			if(firstAlpha.contains(epsilon)){
+				HashSet<Token> followA = follow.get(A.getValue());	
+				//FollowA
+					for (Token aToken : followA){
+						for(Token anToken : first.get(aToken.getValue())){
+							if(aRule.getRightSide().contains(epsilon) && getRule(A, anToken) == null){
+								setRule(A, anToken, aRule);
+							}
+						}	
+						
+					}
+			}
+			
+			/*
+			HashSet<Token> firstAlpha = firstSet(aRule.getRightSide());
+			for(Token terminal : firstAlpha){
+				System.out.println(terminal.getValue());
+				setRule(aRule.getLeftSide(), terminal, aRule);
+			}
+			
+			if(firstAlpha.contains(epsilon)){
+				for (Token terminal : follow.get(aRule.getLeftSide().getValue()) ) {
+                    // Two production rules for the same M[A,a], the grammar is not LL(1)
+    				setRule(aRule.getLeftSide(), terminal, aRule);
+                }
+			}
+			*/
+			
 		}
 	}
+	
+	/*
+	public HashSet<Token> firstSet(ArrayList<Token> tokenList){
+		
+		HashSet<Token> sum = new HashSet<Token>();
+        if (!tokenList.isEmpty()) {
+            sum.addAll(first.get(tokenList.get(0).getValue()));
+            for (int i = 1; i < tokenList.size(); ++i) {
+                sum.addAll(this.addK1(sum, first.get(tokenList.get(i).getValue())));
+            }
+        }
+        return sum;
+		
+	}
+	
+	private HashSet<Token> addK1(HashSet<Token> l1, HashSet<Token> l2) {
+		HashSet<Token> sumTerminalSetK1 = new HashSet<Token>();
+
+		if (l2.isEmpty()) {
+            sumTerminalSetK1.addAll(l1);
+        } else if (l1.isEmpty()) {
+            sumTerminalSetK1.addAll(l2);
+        } else if (!l1.isEmpty() && !l2.isEmpty()) {
+            for (Token t1 : l1) {
+                for (Token t2 : l2) {                    
+                    if (t1.equals(epsilon)) {
+                    	sumTerminalSetK1.add(t2);
+                    } else {
+                    	sumTerminalSetK1.add(t1);
+                    }
+                }
+
+            }
+        }
+		
+		return sumTerminalSetK1;
+	}
+	*/
 	
 	public void printFirst(){
 		for (Variable var : grammar.getVariables()) {
@@ -250,7 +322,9 @@ public class ActionTable {
 
         result += " \t";
         for (Terminal aTerminal : grammar.getTerminals()) {
-            result += aTerminal.getValue() + "\t";
+        	if(!aTerminal.equals(epsilon)){
+        		result += aTerminal.getValue() + "\t";
+        	}
         }
 
         result += "\n";
@@ -259,13 +333,14 @@ public class ActionTable {
         	
             result += aVariable.getValue() + " \t";
             for (Terminal aTerminal : grammar.getTerminals()) {
-            	
-                ProductionRule productionRule = matrix.get(aVariable).get(aTerminal);
-                if (productionRule == null) {
-                    result += "/" + " \t";
-                } else {
-                    result += productionRule.getRuleNumber() + " \t";
-                }
+            	if(!aTerminal.equals(epsilon)){
+	                ProductionRule productionRule = matrix.get(aVariable).get(aTerminal);
+	                if (productionRule == null) {
+	                    result += "/" + " \t";
+	                } else {
+	                    result += productionRule.getRuleNumber() + " \t";
+	                }
+            	}
                 
             }
             result += "\n";

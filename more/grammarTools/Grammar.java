@@ -32,6 +32,7 @@ public class Grammar {
 	    	
 			while ((line = reader.readLine()) != null) {
 				String splitLine[] = line.split("->");
+				
 				String leftSide = splitLine[0].trim();
 				String rightSide[] = splitLine[1].trim().split("\\s\\|\\s");
 				

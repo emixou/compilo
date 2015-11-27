@@ -22,8 +22,13 @@ public class Parser {
 	public Parser(String grammarFileName, java.io.FileReader program) {
 		stack = new Stack();
 		grammar = new Grammar(grammarFileName);
+		for(Terminal terminal : grammar.getTerminals()){
+			System.out.println(terminal.getValue());
+		}
+		
 		actionTable = new ActionTable(grammar);
 		actionTable.build();
+		System.out.println(actionTable.toString());
 		scanner = new LexicalAnalyzer(program);
 	}
 	
