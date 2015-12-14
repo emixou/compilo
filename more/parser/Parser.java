@@ -43,7 +43,7 @@ public class Parser {
 				generator.accumulate(head);
 				
 				//}
-				if (head.getValue().equals(";") || head.getValue().equals("end")) {
+				if (head.getValue().equals(";") || head.getValue().equals("do") || head.getValue().equals("end")) {
 					generator.trigger();
 				}
 				symbol = scanner.nextToken();

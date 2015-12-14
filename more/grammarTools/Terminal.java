@@ -4,13 +4,21 @@ import scanner.LexicalUnit;
 import scanner.Symbol;
 
 public class Terminal extends Token{
+	private String realValue;
+	
 	
 	public Terminal(String value){
 		super(value);
+		realValue = value;
 	}
 	
 	public Terminal(Symbol aSymbol) {
 		super(getSymbolValue(aSymbol));
+		realValue = (String) aSymbol.getValue();
+	}
+	
+	public String getRealValue() {
+		return realValue;
 	}
 	
 	private static String getSymbolValue(Symbol aSymbol) {
