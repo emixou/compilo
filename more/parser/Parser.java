@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.regex.PatternSyntaxException;
 
+import generator.Generator;
 import grammarTools.ActionTable;
 import grammarTools.Grammar;
 import grammarTools.ProductionRule;
@@ -28,6 +29,7 @@ public class Parser {
 	}
 	
 	public void parse() throws PatternSyntaxException, IOException, SyntaxErrorException {
+		Generator generator = new Generator();
 		stack.push(grammar.getStartSymbol());
 		
 		Symbol symbol = scanner.nextToken();
@@ -38,12 +40,18 @@ public class Parser {
 				accept();
 				break;
 			} else if (grammar.isTerminal(top) && head.equals(top)) {
+				generator.accumulate(head);
+				
+				//}
+				if (head.getValue().equals(";") || head.getValue().equals("end")) {
+					generator.trigger();
+				}
 				symbol = scanner.nextToken();
 				head = new Terminal(symbol);
 				top = stack.pop();
 			}else if (!grammar.isTerminal(top) && actionTable.getRule(top,head)!= null) {
 				ProductionRule aRule = actionTable.getRule(top,head);
-				System.out.println(aRule.getRuleNumber());
+				//System.out.println(aRule.getRuleNumber());
 				produce(aRule);
 				top = stack.pop();
 			} else {

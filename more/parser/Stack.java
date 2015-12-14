@@ -17,4 +17,5 @@ public class Stack extends ArrayList<Token> {
 	public Token top() {
 		return this.get(this.size()-1);
 	}
+	
 }

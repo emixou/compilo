@@ -17,9 +17,14 @@ public abstract class Token {
 	}
 	
 	@Override
-	public boolean equals(Object aToken){
+	public boolean equals(Object obj){
 		//System.err.println(this.value + " == " + ((Token) aToken).value);
-		return this.value.equals(((Token) aToken).value);
+		if (obj instanceof Token ) {
+			return this.value.equals(((Token) obj).value);
+		} else if (obj instanceof String) {
+			return this.value.equals((String) obj);
+		}
+		return false;
 	}
 	
 	@Override
