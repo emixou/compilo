@@ -73,7 +73,7 @@ public class Parser {
 	}
 	
 	private void accept() {
-		System.out.println("Accepted.");
+		//System.out.println("Accepted.");
 	}
 	
 	private void error(Symbol symbol) {
