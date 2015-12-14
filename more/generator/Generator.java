@@ -9,6 +9,12 @@ public class Generator {
 	
 	public Generator() {
 		accumulator = new ArrayList<Terminal>();
+		
+	}
+	
+	private void init() {
+		System.out.println("declare i32 @getchar ();");
+		System.out.println("declare i32 @putchar(i32);");
 	}
 	
 	public void accumulate(Terminal aTerminal) {
@@ -37,7 +43,7 @@ public class Generator {
 		} else if (accumulator.get(0).equals("read")) {
 			System.out.println("read");
 		} else if (accumulator.get(0).equals("print")) {
-			System.out.println("print");
+			handlePrintInstGen();
 		} else { // assign
 			System.out.println("assign");
 		}
@@ -47,6 +53,10 @@ public class Generator {
 		}
 		
 		accumulator.clear();
+	}
+	
+	private void handlePrintInstGen() {
+		
 	}
 
 }
