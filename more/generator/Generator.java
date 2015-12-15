@@ -23,8 +23,74 @@ public class Generator {
 	}
 	
 	private void init() {
-		System.out.println("declare i32 @getchar()");
-		System.out.println("declare i32 @putchar(i32)");
+		System.out.println(	"declare i32 @getchar()\n" +
+							"declare i32 @putchar(i32)\n" +
+		
+							"define i32 @getint() {\n" +
+			                "entry:\n" +
+			                "%res = alloca i32\n" +
+			                "%digit = alloca i32\n" +
+			                "store i32 0, i32* %res\n" +
+			                "br label %read\n" +
+			                "read:\n" +
+			                "%0 = call i32 @getchar()\n" +
+			                "%1 = sub i32 %0, 48\n" +
+			                "store i32 %1, i32* %digit\n" +
+			                "%2 = icmp ne i32 %0, 10\n" +
+			                "br i1 %2, label %save , label %exit\n" +
+			                "save:\n" +
+			                "%3 = load i32, i32* %res\n" +
+			                "%4 = load i32, i32* %digit\n" +
+			                "%5 = mul i32 %3, 10\n" +
+			                "%6 = add i32 %5, %4\n" +
+			                "store i32 %6, i32* %res\n" +
+			                "br label %read\n" +
+			                "exit:\n" +
+			                "%7 = load i32, i32* %res\n" +
+			                "ret i32 %7\n" +
+			                "}\n\n" +
+		
+							"define void @printlnint(i32 %n) {\n" +
+					        "%digitInChar = alloca [32 x i32]\n" +
+					        "%number = alloca i32\n" +
+					        "store i32 %n, i32* %number\n" +
+					        "%numberOfDigits = alloca i32\n" +
+					        "store i32 0, i32* %numberOfDigits\n" +
+					        "br label %beginloop\n" +
+					        "beginloop:\n" +
+					        "%1 = load i32, i32* %number\n" +
+					        "%2 = icmp ne i32 %1, 0\n" +
+					        "br i1 %2, label %ifloop, label %endloop\n" +
+					        "ifloop:\n" +
+					        "%temp1 = load i32, i32* %numberOfDigits\n" +
+					        "%temp2 = load i32, i32* %number\n" +
+					        "%divnum = udiv i32 %temp2, 10\n" +
+					        "%currentDigit = urem i32 %temp2, 10\n" +
+					        "%arrayElem = getelementptr [32 x i32], [32 x i32]* %digitInChar, i32 0, i32 %temp1\n" +
+					        "store i32 %currentDigit, i32* %arrayElem\n" +
+					        "%temp3 = add i32 %temp1, 1\n" +
+					        "store i32 %temp3, i32* %numberOfDigits\n" +
+					        "store i32 %divnum, i32* %number\n" +
+					        "br label %beginloop\n" +
+					        "endloop:\n" +
+					        "%temp4 = load i32, i32* %numberOfDigits\n" +
+					        "%temp41 = sub i32 %temp4, 1\n" +
+					        "store i32 %temp41, i32* %numberOfDigits\n" +
+					        "br label %beginloop2\n" +
+					        "beginloop2:\n" +
+					        "%temp5 = load i32, i32* %numberOfDigits\n" +
+					        "%arrayElem2 = getelementptr [32 x i32], [32 x i32]* %digitInChar, i32 0, i32 %temp5\n" +
+					        "%arrayElemValue = load i32, i32* %arrayElem2\n" +
+					        "%arrayElemValue2 = add i32 %arrayElemValue, 48\n" +
+					        "call i32 @putchar(i32 %arrayElemValue2)\n" +
+					        "%temp6 = sub i32 %temp5, 1\n" +
+					        "store i32 %temp6, i32* %numberOfDigits\n" +
+					        "%temp7 = icmp sge i32 %temp6, 0\n" +
+					        "br i1 %temp7, label %beginloop2, label %endloop2\n" +
+					        "endloop2:\n" +
+					        "call i32 @putchar(i32 10)\n" +
+					        "ret void\n" +
+					        "}\n\n");
 	}
 	
 	public void accumulate(Terminal aTerminal) {
@@ -139,7 +205,7 @@ public class Generator {
 		String varname = accumulator.get(2).getRealValue();
 		String tmpVar = newTmpVar("pv");
 		System.out.println("%"+tmpVar+" = load i32, i32* %"+varname);
-		System.out.println("call i32 @putchar(i32 %"+tmpVar+")");
+		System.out.println("call void @printlnint(i32 %"+tmpVar+")");
 	}
 	
 	private void handleReadInstGen() {
@@ -149,7 +215,7 @@ public class Generator {
 			System.out.println("%"+varname+" = alloca i32");
 		}
 		String tmpVar = newTmpVar("or");
-		System.out.println("%"+tmpVar+" = call i32 @getchar()");
+		System.out.println("%"+tmpVar+" = call i32 @getint()");
 		System.out.println("store i32 %"+tmpVar+", i32* %"+varname);
 	}
 	

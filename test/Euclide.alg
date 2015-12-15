@@ -4,14 +4,9 @@ co Euclid's algorithm co
 begin
   read(a) ;
   read(b) ;
-  d := 1 ;
-  while b /= 0 do
-    c := b ;
-    while a >= b do     co computation of modulo co
-      a := a - b
-    od ;
-    b := a ;
-    a := c
-  od ;
-  print(a)
+  print(b);
+  print(a);
+  
+  c := a - b;
+  print(c)
 end
