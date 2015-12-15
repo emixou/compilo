@@ -19,7 +19,7 @@ public class Generator {
 	
 	private String newTmpVar(String name) {
 		++id;
-		return name+"_"+id;
+		return "%"+name+"_"+id;
 	}
 	
 	private void init() {
@@ -149,17 +149,45 @@ public class Generator {
 		String varname = rightPart.getRealValue();
 		if (!varnames.contains(varname)) {
 			varnames.add(varname);
-			System.out.println("%"+varname+" = alloca i32");
+			alloca(varname);
 		}
-		System.out.println("store i32 "+tmpVar+", i32* %"+varname);
+		store(tmpVar,varname);
+	}
+	
+	private void alloca(String varname) {
+		System.out.println("%"+varname+" = alloca i32");
+	}
+	
+	private void store(String value, String varname) {
+		System.out.println("store i32 "+value+", i32* %"+varname);
+	}
+	
+	private String load(String varname) {
+		String tmpVar = newTmpVar("lv");
+		System.out.println(tmpVar+" = load i32, i32* %"+varname);
+		return tmpVar;
+	}
+	
+	private String op(String v1, String v2, String op) {
+		String tmpVar = newTmpVar("ov");
+		System.out.print(tmpVar+" = ");
+		if (op.equals("+")) {
+			System.out.print("add");
+		} else if (op.equals("-")) {
+			System.out.print("sub");
+		} else if (op.equals("*")) {
+			System.out.print("mul");
+		} else if (op.equals("/")) {
+			System.out.print("sdiv");
+		}
+		System.out.println(" i32 "+v1+", "+v2);
+		return tmpVar;
 	}
 	
 	private String handleExprArithGen(List<Terminal> anExprArith) {
 		if (anExprArith.size()==1) {
 			if (anExprArith.get(0).equals("[VarName]")) {
-				String tmpVar = newTmpVar("vv");
-				System.out.println("%"+tmpVar+" = load i32, i32* %"+anExprArith.get(0).getRealValue());
-				return "%"+tmpVar;
+				return load(anExprArith.get(0).getRealValue());
 			} else {
 				return anExprArith.get(0).getRealValue();
 			}
@@ -168,7 +196,7 @@ public class Generator {
 				String tmpVar = newTmpVar("lv");
 				anExprArith.remove(0);
 				String val = handleExprArithGen(anExprArith);
-				System.out.println("%"+tmpVar+" = sub i32 0,"+val);
+				return op("0",val,"-");
 			}
 		} else if (anExprArith.size()==3){
 			if (anExprArith.get(0).equals("(")) {
@@ -177,20 +205,36 @@ public class Generator {
 			} else {
 				String v1 = handleExprArithGen(anExprArith.subList(0, 1));
 				String v2 = handleExprArithGen(anExprArith.subList(2, 3));
-				String tmpVar = newTmpVar("ov");
-				System.out.print("%"+tmpVar+" = ");
-				if (accumulator.get(1).equals("+")) {
-					System.out.print("add");
-				} else if (accumulator.get(1).equals("-")) {
-					System.out.print("sub");
-				} else if (accumulator.get(1).equals("*")) {
-					System.out.print("mul");
-				} else if (accumulator.get(1).equals("/")) {
-					System.out.print("sdiv");
-				}
-				System.out.println(" i32 "+v1+", "+v2);
-				return "%"+tmpVar;
+				return op(v1,v2,accumulator.get(1).getValue());
 			}
+		} else { // a + ( - 3 + x  * 2 ) - 2
+			int parenthesisCpt = 0;
+			int i=0;
+			String tmpVar=null;
+			while (i<anExprArith.size()) {
+				Terminal aTerminal = anExprArith.get(i);
+				if (aTerminal.getValue().equals("(")) ++parenthesisCpt;
+				if (aTerminal.getValue().equals(")")) --parenthesisCpt;
+				
+				if (parenthesisCpt==0) {
+					if ((aTerminal.getValue().equals("-") && i>0) || aTerminal.getValue().equals("+")) {
+						int j = i+1;
+						if (anExprArith.get(j).equals("(")) {
+							++j;
+							while (!anExprArith.get(j).equals(")")) j++;
+						}
+						String v1 = tmpVar;
+						if (tmpVar==null)
+							v1 = handleExprArithGen(anExprArith.subList(0, i));
+						
+						String v2 = handleExprArithGen(anExprArith.subList(i+1, j+1));
+						tmpVar = op(v1,v2,anExprArith.get(i).getValue());
+						i=j;
+					}
+				}
+				++i;
+			}
+			return tmpVar;
 			
 		}
 
@@ -203,20 +247,19 @@ public class Generator {
 	
 	private void handlePrintInstGen() {
 		String varname = accumulator.get(2).getRealValue();
-		String tmpVar = newTmpVar("pv");
-		System.out.println("%"+tmpVar+" = load i32, i32* %"+varname);
-		System.out.println("call void @printlnint(i32 %"+tmpVar+")");
+		String tmpVar = load(varname);
+		System.out.println("call void @printlnint(i32 "+tmpVar+")");
 	}
 	
 	private void handleReadInstGen() {
 		String varname = accumulator.get(2).getRealValue();
 		if (!varnames.contains(varname)) {
 			varnames.add(varname);
-			System.out.println("%"+varname+" = alloca i32");
+			alloca(varname);
 		}
 		String tmpVar = newTmpVar("or");
-		System.out.println("%"+tmpVar+" = call i32 @getint()");
-		System.out.println("store i32 %"+tmpVar+", i32* %"+varname);
+		System.out.println(tmpVar+" = call i32 @getint()");
+		store(tmpVar,varname);
 	}
 	
 	private void handleEndGen() {

@@ -7,6 +7,6 @@ begin
   print(b);
   print(a);
   
-  c := a - b;
+  c := a + b - 2;
   print(c)
 end
