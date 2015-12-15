@@ -40,21 +40,7 @@ public class Parser {
 				accept();
 				break;
 			} else if (grammar.isTerminal(top) && head.equals(top)) {
-				generator.accumulate(head);
-				
-				//}
-				if (head.getValue().equals(";") || head.getValue().equals("do") || head.getValue().equals("end")) {
-					generator.trigger();
-				}
-				
-				else if(head.getValue().equals("if")){
-					generator.trigger();
-				}
-				
-				else if(head.getValue().equals("do")){
-					generator.trigger();
-				}
-				
+				generator.generate(head);
 				symbol = scanner.nextToken();
 				head = new Terminal(symbol);
 				top = stack.pop();

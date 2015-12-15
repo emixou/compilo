@@ -109,12 +109,18 @@ public class Generator {
 					        "}\n\n");
 	}
 	
-	public void accumulate(Terminal aTerminal) {
+	public void generate(Terminal aTerminal) {
 		accumulator.add(aTerminal);
-		
+		String value = aTerminal.getValue();
+		if (value.equals(";") || value.equals("end")) instructionGen();
+		//else if (value.equals("do")) loopGen(); 
+		//else if (value.equals("then")) condGen();
+		//else if (value.equals("else")) elseGen();
+		//else if (value.equals("od")) endLoopGen();
+		//else if (value.equals("fi")) endCondGen();
 	}
 	
-	public void trigger() {
+	public void instructionGen() {
 		if (accumulator.get(0).equals("begin")) {
 			handleBeginGen();
 			accumulator.remove(0);
@@ -130,15 +136,7 @@ public class Generator {
 			accumulator.remove(accumulator.size()-1);
 		}
 
-		if (accumulator.get(0).equals("for")) {
-			//System.out.println("for");
-		} else if (accumulator.get(0).equals("while")) {
-			//System.out.println("while");
-			handleWhileInstGen();
-		} else if (accumulator.get(0).equals("if")) {
-			//System.out.println("if");
-			//handleIfInstGen();
-		} else if (accumulator.get(0).equals("read")) {
+		if (accumulator.get(0).equals("read")) {
 			handleReadInstGen();
 		} else if (accumulator.get(0).equals("print")) {
 			handlePrintInstGen();
@@ -152,6 +150,8 @@ public class Generator {
 		
 		accumulator.clear();
 	}
+	
+	
 	
 	private void handleWhileInstGen(){
 		String loopValue = getLoop();
