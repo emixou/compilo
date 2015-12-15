@@ -9,6 +9,8 @@ public class Generator {
 	private ArrayList<Terminal> accumulator;
 	private ArrayList<String> jumpLabels;
 	private ArrayList<String> varnames;
+	private List<Terminal> opLvl2;
+	private List<Terminal> opLvl1;
 	
 	private int id = 0;
 	private int condId = 0;
@@ -18,6 +20,15 @@ public class Generator {
 		accumulator = new ArrayList<Terminal>();
 		varnames = new ArrayList<String>();
 		jumpLabels = new ArrayList<String>();
+		
+		opLvl2 = new ArrayList<Terminal>();
+		opLvl2.add(new Terminal("+"));
+		opLvl2.add(new Terminal("-"));
+		
+		opLvl1 = new ArrayList<Terminal>();
+		opLvl1.add(new Terminal("*"));
+		opLvl1.add(new Terminal("/"));
+		
 		init();
 	}
 	
@@ -26,18 +37,14 @@ public class Generator {
 		return "%"+id;
 	}
 	
-	private String newCond(){
+	private String newCondLabel(){
 		++condId;
-		return "cond_"+condId;
+		return "cond_"+condId+":";
 	}
 	
-	private String getLoopId(){
-		return "_"+loopId;
-	}
-	
-	private String getLoop(){
+	private String newLoopLabel(){
 		++loopId;
-		return "_"+loopId;
+		return "_"+loopId+":";
 	}
 	
 	private void init() {
@@ -112,154 +119,19 @@ public class Generator {
 	}
 	
 	public void generate(Terminal aTerminal) {
-		accumulator.add(aTerminal);
+		
 		String value = aTerminal.getValue();
-		if (value.equals(";") || value.equals("end")) instructionGen();
+		if (value.equals(";")) instructionGen();
+		else if (value.equals("end")) endInstructionGen();
 		else if (value.equals("do")) loopGen(); 
 		//else if (value.equals("then")) condGen();
 		//else if (value.equals("else")) elseGen();
 		else if (value.equals("od")) endLoopGen();
 		//else if (value.equals("fi")) endCondGen();
+		else accumulator.add(aTerminal);
 	}
-	
-	private void loopGen() {
-		if (accumulator.get(0).equals("while")) {
-			handleWhileInstGen();
-		} else {
-			//handleForInstGen();
-		}
-	}
-	
-	private void endLoopGen() {
-		System.out.println("\tbr label %"+popLabel());
-	}
-	
-	public void pushLabel(String label){
-		jumpLabels.add(label);
-	}
-	
-	private String popLabel(){
-		String tmp = jumpLabels.get(jumpLabels.size()-1);
-		jumpLabels.remove(jumpLabels.size()-1);
-		return tmp;
-	}
-	
-	public void instructionGen() {
-		if (accumulator.get(0).equals("begin")) {
-			handleBeginGen();
-			accumulator.remove(0);
-		} 
-		
-		boolean end=false;
-		if (accumulator.get(accumulator.size()-1).equals("end")) {
-			end = true;
-			accumulator.remove(accumulator.size()-1);
-		}
-		
-		if (accumulator.get(accumulator.size()-1).equals(";")) {
-			accumulator.remove(accumulator.size()-1);
-		}
 
-		if (accumulator.get(0).equals("read")) {
-			handleReadInstGen();
-		} else if (accumulator.get(0).equals("print")) {
-			handlePrintInstGen();
-		} else {
-			handleAssignInstGen();
-		}
-		
-		if (end) {
-			handleEndGen();
-		}
-		
-		accumulator.clear();
-	}
-	
-	
-	
-	private void handleWhileInstGen(){
-		String loopValue = getLoop();
-		String condVarname = accumulator.get(1).getRealValue();
-		String condCompvalue = accumulator.get(3).getRealValue();
-		
-		pushLabel("cond"+loopValue);
-		
-		System.out.println("beforeLoop"+loopValue);
-	
-		System.out.println("\tbeforeloop instructions"); // init cond var loop
-		
-		System.out.println("\tbr label %cond"+loopValue); // jump to cond
-		
-		System.out.println(handleIfInstGen(accumulator.subList(1, 4)));
-		System.out.println("\tbr i1 %result, label %loop"+loopValue+", label afterLoop"+loopValue);
-		
-		System.out.println("afterLoop"+loopValue+":");
-		
-		//LOOP MAIN
-		System.out.println("loop"+loopValue+":");
-	}
-	
-	//Call from handle method
-	private String handleIfInstGen(List<Terminal> list){
-
-		String comparator;
-		String condition;
-		
-		if(list == null){
-			comparator = accumulator.get(1).getValue();
-		}else{
-			comparator = list.get(1).getValue();
-		}
-
-		System.out.println(newCond()+":");
-		condition = "\t%result icmp ";
-		
-		if(comparator.equals("<=")){
-			condition+= "ule ";
-		}else if(comparator.equals("<")){
-			condition+= "ult";
-		}else if(comparator.equals(">=")){
-			condition+= "uge ";
-		}else if(comparator.equals(">")){
-			condition+= "ugt";
-		}else if(comparator.equals("==")){
-			condition+= "eq";
-		}else{
-			condition+= "ne";
-		}
-		
-		if(list == null){
-			condition+= " i32 " + accumulator.get(0).getRealValue() +", ";
-			condition+=  accumulator.get(2).getRealValue();
-		}else{
-			condition+= " i32 " + list.get(0).getRealValue() +", ";
-			condition+=  list.get(2).getRealValue();
-		}
-		
-		return condition;
-		
-	}
-	
-	//Call from trigger method
-	private void handleIfInstGen(){
-		
-		handleIfInstGen(null);
-	}
-	
-	private void handleAssignInstGen() {
-		Terminal rightPart = accumulator.get(0);
-		accumulator.remove(0); accumulator.remove(0); 
-		if (accumulator.get(accumulator.size()-1).equals(";")) {
-			accumulator.remove(accumulator.size()-1);
-		}
-		String tmpVar = handleExprArithGen(accumulator);
-		String varname = rightPart.getRealValue();
-		if (!varnames.contains(varname)) {
-			varnames.add(varname);
-			alloca(varname);
-		}
-		store(tmpVar,varname);
-	}
+// ################### CODE FORMATING ###################
 	
 	private void alloca(String varname) {
 		System.out.println("%"+varname+" = alloca i32");
@@ -291,114 +163,42 @@ public class Generator {
 		return tmpVar;
 	}
 	
-	private String decompose(List<Terminal> anExprArith, int prev, int curr, String intermediate) {
-		String v1 = intermediate;
-		if (intermediate==null)
-			v1 = handleExprArithGen(anExprArith.subList(0, prev));
-		
-		String v2 = handleExprArithGen(anExprArith.subList(prev+1, curr));
-		return op(v1,v2,anExprArith.get(prev).getValue());
-	}
+// ################### GENERAL ###################
 	
-	private String moreLessOpExprArithDecomp(List<Terminal> anExprArith) {
-		int parenthesisCpt = 0;
-		int i=0;
-		String tmpVar=null;
-		int prev = -1;
-		while (i<anExprArith.size()) {
-			Terminal aTerminal = anExprArith.get(i);
-			if (aTerminal.getValue().equals("(")) ++parenthesisCpt;
-			if (aTerminal.getValue().equals(")")) --parenthesisCpt;
-			
-			if (parenthesisCpt==0) {
-				if ((aTerminal.getValue().equals("-") && i>0) || aTerminal.getValue().equals("+")) {
-					if (prev==-1) prev = i;
-					else {
-						tmpVar = decompose(anExprArith,prev,i,tmpVar);
-						prev=i;
-					}
-				}
-			}
-			++i;
-		}
-		if (prev!=-1) {
-			tmpVar = decompose(anExprArith,prev,i,tmpVar);
-		}
-		return tmpVar;
-	}
-	
-	private String timesDivideOpExprArithDecomp(List<Terminal> anExprArith) {
-		int parenthesisCpt = 0;
-		int i=0;
-		String tmpVar=null;
-		int prev = -1;
-		while (i<anExprArith.size()) {
-			Terminal aTerminal = anExprArith.get(i);
-			if (aTerminal.getValue().equals("(")) ++parenthesisCpt;
-			if (aTerminal.getValue().equals(")")) --parenthesisCpt;
-			
-			if (parenthesisCpt==0) {
-				if (aTerminal.getValue().equals("*") || aTerminal.getValue().equals("/")) {
-					if (prev==-1) prev = i;
-					else {
-						tmpVar = decompose(anExprArith,prev,i,tmpVar);
-						prev=i;
-					}
-				}
-			}
-			++i;
-		}
-		if (prev!=-1) {
-			tmpVar = decompose(anExprArith,prev,i,tmpVar);
-		}
-		return tmpVar;
-	}
-	
-	private String parenthesisDecomp(List<Terminal> anExprArith) {
-		if (anExprArith.get(0).equals("-")) {
-			String tmpVar = parenthesisDecomp(anExprArith.subList(1, anExprArith.size()));
-			return op("0",tmpVar,"-");
-		}
-		return handleExprArithGen(anExprArith.subList(1, anExprArith.size()-1));
-	}
-	
-	private String handleExprArithGen(List<Terminal> anExprArith) {
-		if (anExprArith.size()==1) {
-			if (anExprArith.get(0).equals("[VarName]")) {
-				return load(anExprArith.get(0).getRealValue());
-			} else {
-				return anExprArith.get(0).getRealValue();
-			}
-		} else if (anExprArith.size()==2) {
-			if (anExprArith.get(0).equals("-")) {
-				String val = handleExprArithGen(anExprArith.subList(1, anExprArith.size()));
-				return op("0",val,"-");
-			}
-		} else if (anExprArith.size()==3){
-			if (anExprArith.get(0).equals("(")) {
-				return handleExprArithGen(anExprArith.subList(1, anExprArith.size()));
-			} else {
-				String v1 = handleExprArithGen(anExprArith.subList(0, 1));
-				String v2 = handleExprArithGen(anExprArith.subList(2, 3));
-				return op(v1,v2,anExprArith.get(1).getValue());
-			}
-		} else {
-			// <ExprArith> +|- <ExprArith> +|- ...
-			String res = moreLessOpExprArithDecomp(anExprArith);
-			if (res!=null) return res;
-			// <ExprArith> *|/ <ExprArith> *|/ ...
-			res = timesDivideOpExprArithDecomp(anExprArith);
-			if (res!=null) return res; 
-			// -(<ExprArith>) and (<ExprArith>)
-			return parenthesisDecomp(anExprArith);
-		}
-
-		return "";
-	}
-	
-	private void handleBeginGen() {
+	private void beginGen() {
 		System.out.println("define i32 @main() {");
 	}
+	
+	private void endGen() {
+		System.out.println("ret i32 0");
+		System.out.println("}");
+	}
+
+// ################### INSTRUCTIONS ###################
+	
+	public void instructionGen() {
+		if (accumulator.get(0).equals("begin")) {
+			beginGen();
+			accumulator.remove(0);
+		} 
+
+		if (accumulator.get(0).equals("read")) {
+			handleReadInstGen();
+		} else if (accumulator.get(0).equals("print")) {
+			handlePrintInstGen();
+		} else {
+			handleAssignInstGen();
+		}
+		
+		accumulator.clear();
+	}
+	
+	private void endInstructionGen() {
+		instructionGen();
+		endGen();
+	}
+	
+// ################### READ & WRITE ###################
 	
 	private void handlePrintInstGen() {
 		String varname = accumulator.get(2).getRealValue();
@@ -416,10 +216,179 @@ public class Generator {
 		System.out.println(tmpVar+" = call i32 @getint()");
 		store(tmpVar,varname);
 	}
+
+// ################### ASSIGNATION ###################	
+
+	private void handleAssignInstGen() {
+		String tmpVar = handleExprArithGen(accumulator.subList(2, accumulator.size()));
+		String varname = accumulator.get(0).getRealValue();
+		if (!varnames.contains(varname)) {
+			varnames.add(varname);
+			alloca(varname);
+		}
+		store(tmpVar,varname);
+	}
+
+// ################### EXPR ARITH ###################	
+
+	private String handleExprArithGen(List<Terminal> anExprArith) {
+		if (anExprArith.size()==1) {
+			if (anExprArith.get(0).equals("[VarName]")) {
+				return load(anExprArith.get(0).getRealValue());
+			} else {
+				return anExprArith.get(0).getRealValue();
+			}
+		} if (anExprArith.size()==2) {
+			String val = handleExprArithGen(anExprArith.subList(1, anExprArith.size()));
+			return op("0",val,"-");
+		} else { // a + ( - b * 2 + 5 ) - 3 
+			// <ExprArith> +|- <ExprArith> +|- ...
+			String res = opExprArithDecomp(anExprArith, opLvl2);
+			if (res!=null) return res;
+			// <ExprArith> *|/ <ExprArith> *|/ ...
+			res = opExprArithDecomp(anExprArith, opLvl1);
+			if (res!=null) return res; 
+			// -(<ExprArith>) and (<ExprArith>)
+			return parenthesisDecomp(anExprArith);
+		}
+	}
 	
-	private void handleEndGen() {
-		System.out.println("ret i32 0");
-		System.out.println("}");
+	private String decompose(List<Terminal> anExprArith, int prev, int curr, String intermediate) {
+		String v1 = intermediate;
+		if (intermediate==null)
+			v1 = handleExprArithGen(anExprArith.subList(0, prev));
+		
+		String v2 = handleExprArithGen(anExprArith.subList(prev+1, curr));
+		return op(v1,v2,anExprArith.get(prev).getValue());
+	}
+	
+	private String opExprArithDecomp(List<Terminal> anExprArith, List<Terminal> op) {
+		int parenthesisCpt = 0;
+		int i=0;
+		String tmpVar=null;
+		int prev = -1;
+		while (i<anExprArith.size()) {
+			Terminal aTerminal = anExprArith.get(i);
+			if (aTerminal.getValue().equals("(")) ++parenthesisCpt;
+			if (aTerminal.getValue().equals(")")) --parenthesisCpt;
+			
+			if (parenthesisCpt==0) {
+				if (op.contains(aTerminal) && i>0) {
+					if (prev==-1) prev = i;
+					else {
+						tmpVar = decompose(anExprArith,prev,i,tmpVar);
+						prev=i;
+					}
+				}
+			}
+			++i;
+		}
+		if (prev!=-1) {
+			tmpVar = decompose(anExprArith,prev,i,tmpVar);
+		}
+		return tmpVar;
+	}
+	
+	private String parenthesisDecomp(List<Terminal> anExprArith) {
+		if (anExprArith.get(0).equals("-")) {
+			String tmpVar = handleExprArithGen(anExprArith.subList(2, anExprArith.size()-1));
+			return op("0",tmpVar,"-");
+		}
+		return handleExprArithGen(anExprArith.subList(1, anExprArith.size()-1));
+	}
+	
+// ################### LOOPS ###################	
+	
+	private void loopGen() {
+		if (accumulator.get(0).equals("while")) {
+			handleWhileInstGen();
+		} else {
+			//handleForInstGen();
+		}
+	}
+	
+	private void endLoopGen() {
+		System.out.println("\tbr label %"+popLabel());
+	}
+	
+	public void pushLabel(String label){
+		jumpLabels.add(label);
+	}
+	
+	private String popLabel(){
+		String tmp = jumpLabels.get(jumpLabels.size()-1);
+		jumpLabels.remove(jumpLabels.size()-1);
+		return tmp;
+	}
+
+
+// ################### WHILE ###################	
+	
+	private void handleWhileInstGen(){
+		String loopValue = "poney" ; //getLoop(); must use newLoopLabel();
+		String condVarname = accumulator.get(1).getRealValue();
+		String condCompvalue = accumulator.get(3).getRealValue();
+		
+		pushLabel("cond"+loopValue);
+			
+		System.out.println("\tbr label %cond"+loopValue); // jump to cond
+		
+		System.out.println(handleIfInstGen(accumulator.subList(1, 4)));
+		System.out.println("\tbr i1 %result, label %loop"+loopValue+", label afterLoop"+loopValue);
+		
+		System.out.println("afterLoop"+loopValue+":");
+		
+		//LOOP MAIN
+		System.out.println("loop"+loopValue+":");
+	}
+
+// ################### CONDITIONS ###################	
+	
+	//Call from trigger method
+	private void handleIfInstGen(){
+		
+		handleIfInstGen(null);
+	}
+	
+	//Call from handle method
+	private String handleIfInstGen(List<Terminal> list){
+
+		String comparator;
+		String condition;
+		
+		if(list == null){
+			comparator = accumulator.get(1).getValue();
+		}else{
+			comparator = list.get(1).getValue();
+		}
+
+		System.out.println(newCondLabel()+":");
+		condition = "\t%result icmp ";
+		
+		if(comparator.equals("<=")){
+			condition+= "ule ";
+		}else if(comparator.equals("<")){
+			condition+= "ult";
+		}else if(comparator.equals(">=")){
+			condition+= "uge ";
+		}else if(comparator.equals(">")){
+			condition+= "ugt";
+		}else if(comparator.equals("==")){
+			condition+= "eq";
+		}else{
+			condition+= "ne";
+		}
+		
+		if(list == null){
+			condition+= " i32 " + accumulator.get(0).getRealValue() +", ";
+			condition+=  accumulator.get(2).getRealValue();
+		}else{
+			condition+= " i32 " + list.get(0).getRealValue() +", ";
+			condition+=  list.get(2).getRealValue();
+		}
+		
+		return condition;
+		
 	}
 
 }
