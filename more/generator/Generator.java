@@ -17,9 +17,9 @@ public class Generator {
 		init();
 	}
 	
-	private String newTmpVar(String name) {
+	private String newTmpVar() {
 		++id;
-		return "%"+name+"_"+id;
+		return "%"+id;
 	}
 	
 	private void init() {
@@ -163,13 +163,13 @@ public class Generator {
 	}
 	
 	private String load(String varname) {
-		String tmpVar = newTmpVar("lv");
+		String tmpVar = newTmpVar();
 		System.out.println(tmpVar+" = load i32, i32* %"+varname);
 		return tmpVar;
 	}
 	
 	private String op(String v1, String v2, String op) {
-		String tmpVar = newTmpVar("ov");
+		String tmpVar = newTmpVar();
 		System.out.print(tmpVar+" = ");
 		if (op.equals("+")) {
 			System.out.print("add");
@@ -247,6 +247,14 @@ public class Generator {
 		return tmpVar;
 	}
 	
+	private String parenthesisDecomp(List<Terminal> anExprArith) {
+		if (anExprArith.get(0).equals("-")) {
+			String tmpVar = parenthesisDecomp(anExprArith.subList(1, anExprArith.size()));
+			return op("0",tmpVar,"-");
+		}
+		return handleExprArithGen(anExprArith.subList(1, anExprArith.size()-1));
+	}
+	
 	private String handleExprArithGen(List<Terminal> anExprArith) {
 		if (anExprArith.size()==1) {
 			if (anExprArith.get(0).equals("[VarName]")) {
@@ -256,27 +264,26 @@ public class Generator {
 			}
 		} else if (anExprArith.size()==2) {
 			if (anExprArith.get(0).equals("-")) {
-				String tmpVar = newTmpVar("lv");
-				anExprArith.remove(0);
-				String val = handleExprArithGen(anExprArith);
+				String val = handleExprArithGen(anExprArith.subList(1, anExprArith.size()));
 				return op("0",val,"-");
 			}
 		} else if (anExprArith.size()==3){
 			if (anExprArith.get(0).equals("(")) {
-				anExprArith.remove(0); anExprArith.remove(anExprArith.size()-1);
-				return handleExprArithGen(anExprArith);
+				return handleExprArithGen(anExprArith.subList(1, anExprArith.size()));
 			} else {
 				String v1 = handleExprArithGen(anExprArith.subList(0, 1));
 				String v2 = handleExprArithGen(anExprArith.subList(2, 3));
-				return op(v1,v2,accumulator.get(1).getValue());
+				return op(v1,v2,anExprArith.get(1).getValue());
 			}
-		} else { // a + ( - 3 + x  * 2 ) - 2
+		} else {
+			// <ExprArith> +|- <ExprArith> +|- ...
 			String res = moreLessOpExprArithDecomp(anExprArith);
 			if (res!=null) return res;
+			// <ExprArith> *|/ <ExprArith> *|/ ...
 			res = timesDivideOpExprArithDecomp(anExprArith);
-			if (res!=null) return res;
-			
-			
+			if (res!=null) return res; 
+			// -(<ExprArith>) and (<ExprArith>)
+			return parenthesisDecomp(anExprArith);
 		}
 
 		return "";
@@ -298,7 +305,7 @@ public class Generator {
 			varnames.add(varname);
 			alloca(varname);
 		}
-		String tmpVar = newTmpVar("or");
+		String tmpVar = newTmpVar();
 		System.out.println(tmpVar+" = call i32 @getint()");
 		store(tmpVar,varname);
 	}
