@@ -7,6 +7,7 @@ import grammarTools.Terminal;
 
 public class Generator {
 	private ArrayList<Terminal> accumulator;
+	private ArrayList<String> jumpLabels;
 	private ArrayList<String> varnames;
 	
 	private int id = 0;
@@ -16,6 +17,7 @@ public class Generator {
 	public Generator() {
 		accumulator = new ArrayList<Terminal>();
 		varnames = new ArrayList<String>();
+		jumpLabels = new ArrayList<String>();
 		init();
 	}
 	
@@ -113,11 +115,33 @@ public class Generator {
 		accumulator.add(aTerminal);
 		String value = aTerminal.getValue();
 		if (value.equals(";") || value.equals("end")) instructionGen();
-		//else if (value.equals("do")) loopGen(); 
+		else if (value.equals("do")) loopGen(); 
 		//else if (value.equals("then")) condGen();
 		//else if (value.equals("else")) elseGen();
-		//else if (value.equals("od")) endLoopGen();
+		else if (value.equals("od")) endLoopGen();
 		//else if (value.equals("fi")) endCondGen();
+	}
+	
+	private void loopGen() {
+		if (accumulator.get(0).equals("while")) {
+			handleWhileInstGen();
+		} else {
+			//handleForInstGen();
+		}
+	}
+	
+	private void endLoopGen() {
+		System.out.println("\tbr label %"+popLabel());
+	}
+	
+	public void pushLabel(String label){
+		jumpLabels.add(label);
+	}
+	
+	private String popLabel(){
+		String tmp = jumpLabels.get(jumpLabels.size()-1);
+		jumpLabels.remove(jumpLabels.size()-1);
+		return tmp;
 	}
 	
 	public void instructionGen() {
@@ -158,6 +182,8 @@ public class Generator {
 		String condVarname = accumulator.get(1).getRealValue();
 		String condCompvalue = accumulator.get(3).getRealValue();
 		
+		pushLabel("cond"+loopValue);
+		
 		System.out.println("beforeLoop"+loopValue);
 	
 		System.out.println("\tbeforeloop instructions"); // init cond var loop
@@ -171,7 +197,6 @@ public class Generator {
 		
 		//LOOP MAIN
 		System.out.println("loop"+loopValue+":");
-		System.out.println("\tbr label %cond"+loopValue); // jump to cond
 	}
 	
 	//Call from handle method
