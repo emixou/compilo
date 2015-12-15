@@ -169,6 +169,8 @@ public class Generator {
 		String condVarname = accumulator.get(1).getRealValue();
 		String condCompvalue = accumulator.get(3).getRealValue();
 		
+		pushLabel("cond"+loopValue);
+		
 		System.out.println("beforeLoop"+loopValue);
 	
 		System.out.println("\tbeforeloop instructions"); // init cond var loop
