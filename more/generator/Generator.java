@@ -10,6 +10,8 @@ public class Generator {
 	private ArrayList<String> varnames;
 	
 	private int id = 0;
+	private int condId = 0;
+	private int loopId = 0;
 	
 	public Generator() {
 		accumulator = new ArrayList<Terminal>();
@@ -20,6 +22,20 @@ public class Generator {
 	private String newTmpVar() {
 		++id;
 		return "%"+id;
+	}
+	
+	private String newCond(){
+		++condId;
+		return "cond_"+condId;
+	}
+	
+	private String getLoopId(){
+		return "_"+loopId;
+	}
+	
+	private String getLoop(){
+		++loopId;
+		return "_"+loopId;
 	}
 	
 	private void init() {
@@ -118,16 +134,14 @@ public class Generator {
 			//System.out.println("for");
 		} else if (accumulator.get(0).equals("while")) {
 			//System.out.println("while");
+			handleWhileInstGen();
 		} else if (accumulator.get(0).equals("if")) {
 			//System.out.println("if");
+			//handleIfInstGen();
 		} else if (accumulator.get(0).equals("read")) {
 			handleReadInstGen();
 		} else if (accumulator.get(0).equals("print")) {
 			handlePrintInstGen();
-		} else if (accumulator.get(accumulator.size()-1).equals("od")){ // assign
-			// handle last loop end
-			accumulator.remove(accumulator.size()-1);
-			trigger();
 		} else {
 			handleAssignInstGen();
 		}
@@ -137,6 +151,74 @@ public class Generator {
 		}
 		
 		accumulator.clear();
+	}
+	
+	private void handleWhileInstGen(){
+		String loopValue = getLoop();
+		String condVarname = accumulator.get(1).getRealValue();
+		String condCompvalue = accumulator.get(3).getRealValue();
+		
+		System.out.println("beforeLoop"+loopValue);
+	
+		System.out.println("\tbeforeloop instructions"); // init cond var loop
+		
+		System.out.println("\tbr label %cond"+loopValue); // jump to cond
+		
+		System.out.println(handleIfInstGen(accumulator.subList(1, 4)));
+		System.out.println("\tbr i1 %result, label %loop"+loopValue+", label afterLoop"+loopValue);
+		
+		System.out.println("afterLoop"+loopValue+":");
+		
+		//LOOP MAIN
+		System.out.println("loop"+loopValue+":");
+		System.out.println("\tbr label %cond"+loopValue); // jump to cond
+	}
+	
+	//Call from handle method
+	private String handleIfInstGen(List<Terminal> list){
+
+		String comparator;
+		String condition;
+		
+		if(list == null){
+			comparator = accumulator.get(1).getValue();
+		}else{
+			comparator = list.get(1).getValue();
+		}
+
+		System.out.println(newCond()+":");
+		condition = "\t%result icmp ";
+		
+		if(comparator.equals("<=")){
+			condition+= "ule ";
+		}else if(comparator.equals("<")){
+			condition+= "ult";
+		}else if(comparator.equals(">=")){
+			condition+= "uge ";
+		}else if(comparator.equals(">")){
+			condition+= "ugt";
+		}else if(comparator.equals("==")){
+			condition+= "eq";
+		}else{
+			condition+= "ne";
+		}
+		
+		if(list == null){
+			condition+= " i32 " + accumulator.get(0).getRealValue() +", ";
+			condition+=  accumulator.get(2).getRealValue();
+		}else{
+			condition+= " i32 " + list.get(0).getRealValue() +", ";
+			condition+=  list.get(2).getRealValue();
+		}
+		
+		return condition;
+		
+	}
+	
+	//Call from trigger method
+	private void handleIfInstGen(){
+		
+		handleIfInstGen(null);
 	}
 	
 	private void handleAssignInstGen() {

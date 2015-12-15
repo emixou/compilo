@@ -21,7 +21,11 @@ public abstract class Token {
 		//System.err.println(this.value + " == " + ((Token) aToken).value);
 		if (obj instanceof Token ) {
 			return this.value.equals(((Token) obj).value);
-		} else if (obj instanceof String) {
+		}
+		else if (obj instanceof Terminal){
+			return this.value.equals(((Token) obj).value);
+		}
+		else if (obj instanceof String) {
 			return this.value.equals((String) obj);
 		}
 		return false;
