@@ -184,6 +184,69 @@ public class Generator {
 		return tmpVar;
 	}
 	
+	private String decompose(List<Terminal> anExprArith, int prev, int curr, String intermediate) {
+		String v1 = intermediate;
+		if (intermediate==null)
+			v1 = handleExprArithGen(anExprArith.subList(0, prev));
+		
+		String v2 = handleExprArithGen(anExprArith.subList(prev+1, curr));
+		return op(v1,v2,anExprArith.get(prev).getValue());
+	}
+	
+	private String moreLessOpExprArithDecomp(List<Terminal> anExprArith) {
+		int parenthesisCpt = 0;
+		int i=0;
+		String tmpVar=null;
+		int prev = -1;
+		while (i<anExprArith.size()) {
+			Terminal aTerminal = anExprArith.get(i);
+			if (aTerminal.getValue().equals("(")) ++parenthesisCpt;
+			if (aTerminal.getValue().equals(")")) --parenthesisCpt;
+			
+			if (parenthesisCpt==0) {
+				if ((aTerminal.getValue().equals("-") && i>0) || aTerminal.getValue().equals("+")) {
+					if (prev==-1) prev = i;
+					else {
+						tmpVar = decompose(anExprArith,prev,i,tmpVar);
+						prev=i;
+					}
+				}
+			}
+			++i;
+		}
+		if (prev!=-1) {
+			tmpVar = decompose(anExprArith,prev,i,tmpVar);
+		}
+		return tmpVar;
+	}
+	
+	private String timesDivideOpExprArithDecomp(List<Terminal> anExprArith) {
+		int parenthesisCpt = 0;
+		int i=0;
+		String tmpVar=null;
+		int prev = -1;
+		while (i<anExprArith.size()) {
+			Terminal aTerminal = anExprArith.get(i);
+			if (aTerminal.getValue().equals("(")) ++parenthesisCpt;
+			if (aTerminal.getValue().equals(")")) --parenthesisCpt;
+			
+			if (parenthesisCpt==0) {
+				if (aTerminal.getValue().equals("*") || aTerminal.getValue().equals("/")) {
+					if (prev==-1) prev = i;
+					else {
+						tmpVar = decompose(anExprArith,prev,i,tmpVar);
+						prev=i;
+					}
+				}
+			}
+			++i;
+		}
+		if (prev!=-1) {
+			tmpVar = decompose(anExprArith,prev,i,tmpVar);
+		}
+		return tmpVar;
+	}
+	
 	private String handleExprArithGen(List<Terminal> anExprArith) {
 		if (anExprArith.size()==1) {
 			if (anExprArith.get(0).equals("[VarName]")) {
@@ -208,33 +271,11 @@ public class Generator {
 				return op(v1,v2,accumulator.get(1).getValue());
 			}
 		} else { // a + ( - 3 + x  * 2 ) - 2
-			int parenthesisCpt = 0;
-			int i=0;
-			String tmpVar=null;
-			while (i<anExprArith.size()) {
-				Terminal aTerminal = anExprArith.get(i);
-				if (aTerminal.getValue().equals("(")) ++parenthesisCpt;
-				if (aTerminal.getValue().equals(")")) --parenthesisCpt;
-				
-				if (parenthesisCpt==0) {
-					if ((aTerminal.getValue().equals("-") && i>0) || aTerminal.getValue().equals("+")) {
-						int j = i+1;
-						if (anExprArith.get(j).equals("(")) {
-							++j;
-							while (!anExprArith.get(j).equals(")")) j++;
-						}
-						String v1 = tmpVar;
-						if (tmpVar==null)
-							v1 = handleExprArithGen(anExprArith.subList(0, i));
-						
-						String v2 = handleExprArithGen(anExprArith.subList(i+1, j+1));
-						tmpVar = op(v1,v2,anExprArith.get(i).getValue());
-						i=j;
-					}
-				}
-				++i;
-			}
-			return tmpVar;
+			String res = moreLessOpExprArithDecomp(anExprArith);
+			if (res!=null) return res;
+			res = timesDivideOpExprArithDecomp(anExprArith);
+			if (res!=null) return res;
+			
 			
 		}
 
