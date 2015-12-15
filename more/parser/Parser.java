@@ -47,12 +47,8 @@ public class Parser {
 					generator.trigger();
 				}
 				
-				else if(head.getValue().equals("if")){
-					generator.trigger();
-				}
-				
-				else if(head.getValue().equals("do")){
-					generator.trigger();
+				else if(head.getValue().equals("od")){
+					System.out.println("\tbr label %"+generator.popLabel()); // jump to cond
 				}
 				
 				symbol = scanner.nextToken();

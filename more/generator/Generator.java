@@ -7,6 +7,7 @@ import grammarTools.Terminal;
 
 public class Generator {
 	private ArrayList<Terminal> accumulator;
+	private ArrayList<String> jumpLabels;
 	private ArrayList<String> varnames;
 	
 	private int id = 0;
@@ -16,6 +17,7 @@ public class Generator {
 	public Generator() {
 		accumulator = new ArrayList<Terminal>();
 		varnames = new ArrayList<String>();
+		jumpLabels = new ArrayList<String>();
 		init();
 	}
 	
@@ -111,7 +113,16 @@ public class Generator {
 	
 	public void accumulate(Terminal aTerminal) {
 		accumulator.add(aTerminal);
-		
+	}
+	
+	public void pushLabel(String label){
+		jumpLabels.add(label);
+	}
+	
+	public String popLabel(){
+		String tmp = jumpLabels.get(jumpLabels.size()-1);
+		jumpLabels.remove(jumpLabels.size()-1);
+		return tmp;
 	}
 	
 	public void trigger() {
@@ -171,7 +182,6 @@ public class Generator {
 		
 		//LOOP MAIN
 		System.out.println("loop"+loopValue+":");
-		System.out.println("\tbr label %cond"+loopValue); // jump to cond
 	}
 	
 	//Call from handle method
