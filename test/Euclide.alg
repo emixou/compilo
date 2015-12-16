@@ -10,7 +10,7 @@ begin
    b := 1+a
   fi;
   
-  while b /= 0 and a>3 do
+  while b /= 0 and a>3 or c < 2 and b = c do
     c := b ;
     while a >= b do     co computation of modulo co
       a := a-b
