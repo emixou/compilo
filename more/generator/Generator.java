@@ -9,8 +9,9 @@ public class Generator {
 	private ArrayList<Terminal> accumulator;
 	private ArrayList<String> jumpLabels;
 	private ArrayList<String> varnames;
-	private List<Terminal> opLvl2;
-	private List<Terminal> opLvl1;
+	private ArrayList<Terminal> opLvl2;
+	private ArrayList<Terminal> opLvl1;
+	private ArrayList<Terminal> comparators;
 	
 	private int id = 0;
 	private int condId = 0;
@@ -30,6 +31,14 @@ public class Generator {
 		opLvl1 = new ArrayList<Terminal>();
 		opLvl1.add(new Terminal("*"));
 		opLvl1.add(new Terminal("/"));
+		
+		comparators = new ArrayList<Terminal>();
+		comparators.add(new Terminal("<"));
+		comparators.add(new Terminal(">"));
+		comparators.add(new Terminal("<="));
+		comparators.add(new Terminal(">="));
+		comparators.add(new Terminal("="));
+		comparators.add(new Terminal("/="));
 		
 		init();
 	}
@@ -202,6 +211,32 @@ public class Generator {
 		return tmpVar;
 	}
 	
+	private String binOp(String v1, String v2, String binOp) {
+		String tmpVar = newTmpVar();
+		print(tmpVar+" = "+binOp+" i1 "+v1+", "+v2, 0);
+		return tmpVar;
+	}
+	
+	private String icmp(String v1, String v2, String comparator) {
+		String tmpVar = newTmpVar();
+		inlinePrint(tmpVar+" = icmp ");
+		if(comparator.equals("<=")) {
+			inlinePrint("ule");
+		} else if(comparator.equals("<")) {
+			inlinePrint("ult");
+		} else if(comparator.equals(">=")) {
+			inlinePrint("uge");
+		} else if(comparator.equals(">")) {
+			inlinePrint("ugt");
+		} else if(comparator.equals("=")) {
+			inlinePrint("eq");
+		} else {
+			inlinePrint("ne");
+		}
+		print(" i32 "+v1+", "+v2);
+		return tmpVar;
+	}
+	
 // ################### GENERAL ###################
 	
 	private void beginGen() {
@@ -294,7 +329,7 @@ public class Generator {
 		}
 	}
 	
-	private String decompose(List<Terminal> anExprArith, int prev, int curr, String intermediate) {
+	private String decomposeExprArith(List<Terminal> anExprArith, int prev, int curr, String intermediate) {
 		String v1 = intermediate;
 		if (intermediate==null)
 			v1 = handleExprArithGen(anExprArith.subList(0, prev));
@@ -317,7 +352,7 @@ public class Generator {
 				if (op.contains(aTerminal) && i>0) {
 					if (prev==-1) prev = i;
 					else {
-						tmpVar = decompose(anExprArith,prev,i,tmpVar);
+						tmpVar = decomposeExprArith(anExprArith,prev,i,tmpVar);
 						prev=i;
 					}
 				}
@@ -325,7 +360,7 @@ public class Generator {
 			++i;
 		}
 		if (prev!=-1) {
-			tmpVar = decompose(anExprArith,prev,i,tmpVar);
+			tmpVar = decomposeExprArith(anExprArith,prev,i,tmpVar);
 		}
 		return tmpVar;
 	}
@@ -390,7 +425,7 @@ public class Generator {
 		//print("\tbr label %cond"+loopValue); // jump to cond
 		
 		//Condition
-		print(handleCondInstGen(accumulator.subList(1, 4)));
+		print(handleCondGen(accumulator.subList(1, 4)));
 		print("\tbr i1 %result, label %loop"+loopValue+", label afterLoop"+loopValue);
 		
 		//LOOP MAIN
@@ -399,45 +434,60 @@ public class Generator {
 
 // ################### CONDITIONS ###################	
 	
+	private String decomposeCond(List<Terminal> aCond, int prev, int curr, String intermediate) {
+		String v1 = intermediate;
+		if (intermediate==null)
+			v1 = handleCondGen(aCond.subList(0, prev));
+		
+		String v2 = handleCondGen(aCond.subList(prev+1, curr));
+		return binOp(v1,v2,aCond.get(prev).getValue());
+	}
+	
+	private String binOpCondDecomp(List<Terminal> aCond, String binOp) {
+		int i=0;
+		String tmpVar=null;
+		int prev = -1;
+		while (i<aCond.size()) {
+			Terminal aTerminal = aCond.get(i);
+			if (aTerminal.equals(binOp)) {
+				if (prev==-1) prev = i;
+				else {
+					tmpVar = decomposeCond(aCond,prev,i,tmpVar);
+					prev=i;
+				}
+			}
+			
+			++i;
+		}
+		if (prev!=-1) {
+			tmpVar = decomposeCond(aCond,prev,i,tmpVar);
+		}
+		return tmpVar;
+	}
+	
+	private String simpleCondGen(List<Terminal> aSimpleCond) {
+		if (aSimpleCond.get(0).equals("not")) {
+			// voir ce quil faut faire
+			
+		}
+		int i = 0;
+		while (!comparators.contains(aSimpleCond.get(i))) ++i;
+		String v1 = handleExprArithGen(aSimpleCond.subList(0, i));
+		String v2 = handleExprArithGen(aSimpleCond).substring(i+1, aSimpleCond.size());
+		return icmp(v1,v2,aSimpleCond.get(i).getValue());
+
+	}
+	
 	//Call from handle method
-	private String handleCondInstGen(List<Terminal> list){
-
-		String comparator;
-		String condition;
-		
-		if(list == null){
-			comparator = accumulator.get(1).getValue();
-		}else{
-			comparator = list.get(1).getValue();
-		}
-
-		print(newCondLabel()+":");
-		condition = "\t%result icmp ";
-		
-		if(comparator.equals("<=")){
-			condition+= "ule ";
-		}else if(comparator.equals("<")){
-			condition+= "ult";
-		}else if(comparator.equals(">=")){
-			condition+= "uge ";
-		}else if(comparator.equals(">")){
-			condition+= "ugt";
-		}else if(comparator.equals("==")){
-			condition+= "eq";
-		}else{
-			condition+= "ne";
-		}
-		
-		if(list == null){
-			condition+= " i32 " + accumulator.get(0).getRealValue() +", ";
-			condition+=  accumulator.get(2).getRealValue();
-		}else{
-			condition+= " i32 " + list.get(0).getRealValue() +", ";
-			condition+=  list.get(2).getRealValue();
-		}
-		
-		return condition;
-		
+	private String handleCondGen(List<Terminal> aCond){
+		// <Cond> and <Cond> and ...
+		String res = binOpCondDecomp(aCond, "and");
+		if (res!=null) return res;
+		// <Cond> or <Cond> or ...
+		res = binOpCondDecomp(aCond, "or");
+		if (res!=null) return res;
+		// not <SimpleCond> | <SimpleCond>
+		return simpleCondGen(aCond);
 	}
 	
 // ################### IF ###################	
@@ -445,7 +495,7 @@ public class Generator {
 	private void ifGen() {
 		String label = newCondLabel();
 		// ajouter le label sur un stack
-		String cond = handleCondInstGen(accumulator.subList(1, accumulator.size()));
+		String cond = handleCondGen(accumulator.subList(1, accumulator.size()));
 		System.out.println("br i1 %"+cond+", label %"+label);
 	}
  
