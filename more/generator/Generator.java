@@ -173,7 +173,7 @@ public class Generator {
 		else if (value.equals("do")) loopGen(); 
 		else if (value.equals("then")) ifGen();
 		//else if (value.equals("else")) elseGen();
-		//else if (value.equals("od")) endLoopGen();
+		else if (value.equals("od")) endLoopGen();
 		//else if (value.equals("fi")) endCondGen();
 		else accumulator.add(aTerminal);
 	}
@@ -219,7 +219,8 @@ public class Generator {
 	
 	private String icmp(String v1, String v2, String comparator) {
 		String tmpVar = newTmpVar();
-		System.out.print(tmpVar+" = icmp ");
+		print("");
+		inlinePrint(tmpVar+" = icmp ", true);
 		if(comparator.equals("<=")) {
 			System.out.print("ule");
 		} else if(comparator.equals("<")) {
@@ -233,7 +234,7 @@ public class Generator {
 		} else {
 			System.out.print("ne");
 		}
-		System.out.println(" i32 "+v1+", "+v2);
+		print(" i32 "+v1+", "+v2, 0);
 		return tmpVar;
 	}
 	
@@ -263,7 +264,7 @@ public class Generator {
 		} else if (accumulator.get(0).equals("print")) {
 			handlePrintInstGen();
 		} else if (accumulator.get(0).equals(":=")) {
-			//handleAssignInstGen();
+			handleAssignInstGen();
 		}
 		
 		accumulator.clear();
@@ -296,8 +297,13 @@ public class Generator {
 // ################### ASSIGNATION ###################	
 
 	private void handleAssignInstGen() {
-		String tmpVar = handleExprArithGen(accumulator.subList(2, accumulator.size()));
 		String varname = accumulator.get(0).getRealValue();
+		String tmpVar = handleExprArithGen(accumulator.subList(2, accumulator.size()));
+		handleAssignInstGen(varname, tmpVar);
+		
+	}
+	
+	private void handleAssignInstGen(String varname, String tmpVar) {
 		if (!varnames.contains(varname)) {
 			varnames.add(varname);
 			alloca(varname);
@@ -414,21 +420,49 @@ public class Generator {
 	
 	private void handleWhileInstGen(){
 		String loopValue = newLoopLabel();
+	
+		ArrayList<Terminal> typeCond = new ArrayList<Terminal>();
+		ArrayList<ArrayList<Terminal>> condList = new ArrayList<ArrayList<Terminal>>();
+		ArrayList<Terminal> tmpCond = new ArrayList<Terminal>();
 		
-		int condNbr = (int) Math.ceil(accumulator.size()/4);
+		for(int i = 1; i < accumulator.size(); ++i){
+			Terminal tmp = accumulator.get(i);
+			if(tmp.getValue().equals("and") || tmp.getValue().equals("or")){
+				condList.add(tmpCond);
+				tmpCond =  new ArrayList<Terminal>();
+				typeCond.add(tmp);
+			}else if(i == accumulator.size()-1){ // if last terminal
+				tmpCond.add(tmp);
+				condList.add(tmpCond);
+				tmpCond =  new ArrayList<Terminal>();
+			}else{
+				tmpCond.add(tmp);
+			}
+		}
 		
-		for(int i = 0; i < condNbr; ++i){
-			String condVarname = accumulator.get(i+1).getRealValue();
-			String condCompvalue = accumulator.get(i+3).getRealValue();
+		int condNbr = condList.size();
+		
+		for(int i = 0; i < condList.size(); ++i){
+
+			String label = newCondLabel();
+			tmpCond = condList.get(i);
+			
+			/*
+			 * String condVarname = tmpCond.get(0).getRealValue();
+			 * String condCompvalue = tmpCond.get(2).getRealValue();
+			 */
 			
 			pushLabel("cond"+loopValue);
 		
 			//Condition
-			print(handleCondGen(accumulator.subList( (i*4)+1, (i*4)+4) ));
 			if(i < (condNbr-1) && condNbr > 1){
-				print("\tbr i1 %result, label %cond_"+(condId+1)+", label afterLoop"+loopValue);
+				print("cond_"+(condId)+":");
+				print("br i1 "+handleCondGen(tmpCond)+", label %cond_"+(condId+1)+", label %afterLoop"+loopValue);
 			}else{
-				print("\tbr i1 %result, label %loop"+loopValue+", label afterLoop"+loopValue);
+				if(i == (condNbr-1) && (condNbr != 1)){
+					print("cond_"+(condId)+":");
+				}
+				print("br i1 "+handleCondGen(tmpCond)+", label %loop"+loopValue+", label %afterLoop"+loopValue);
 			}
 		}
 		
@@ -441,25 +475,54 @@ public class Generator {
 	private void handleForInstGen(){
 		String loopValue = newLoopLabel() ; //getLoop(); must use newLoopLabel();
 		
-		int condNbr = (int) Math.ceil(accumulator.size()/4);
-		
-		for(int i = 0; i < condNbr; ++i){
-			String condVarname = accumulator.get(i+1).getRealValue();
-			String condCompvalue = accumulator.get(i+3).getRealValue();
+		int maxSize = 7;
+		int exprSize = accumulator.size() - maxSize;
+		Terminal variable = accumulator.get(1);
+		ArrayList<Terminal> initValue = new ArrayList<Terminal>();
+		ArrayList<Terminal> endValue  = new ArrayList<Terminal>();
+		ArrayList<Terminal> exprValue = new ArrayList<Terminal>();
 			
-			pushLabel("cond"+loopValue);
+		int byPos = -1;
+		int toPos = -1;
 		
-			//Condition
-			print(handleCondGen(accumulator.subList( (i*4)+1, (i*4)+4) ));
-			if(i < (condNbr-1) && condNbr > 1){
-				print("\tbr i1 %result, label %cond_"+(condId+1)+", label afterLoop"+loopValue);
+		for(int i = 3; i < accumulator.size(); ++i){
+			if(accumulator.get(i).equals("by")){
+				byPos = i;
+			}else if(accumulator.get(i).equals("to")){
+				toPos = i;
 			}else{
-				print("\tbr i1 %result, label %loop"+loopValue+", label afterLoop"+loopValue);
+				if(toPos != -1 && byPos != -1){
+					endValue.add(accumulator.get(i));
+				}else if(byPos != -1 && toPos == -1){
+					exprValue.add(accumulator.get(i));
+				}else{
+					initValue.add(accumulator.get(i));
+				}
 			}
 		}
 		
+		//Before loop
+
+		handleExprArithGen(initValue);
+		
+		String label = newCondLabel();
+		pushLabel("cond"+loopValue);
+		
+		//Condition
+		print(label+":");
+		
+		ArrayList<Terminal> cond = new ArrayList<Terminal>();
+		Terminal lower = new Terminal("<");
+		
+		cond.addAll(exprValue);
+		cond.add(lower);
+		cond.addAll(endValue);
+		
+		print("br i1 "+handleCondGen(cond)+", label %loop"+loopValue+", label %afterLoop"+loopValue);
+
 		//LOOP MAIN
 		print("loop"+loopValue+":");
+		handleExprArithGen(exprValue);
 	}
 	
 // ################### CONDITIONS ###################	
@@ -525,7 +588,7 @@ public class Generator {
 		String label = newCondLabel();
 		// ajouter le label sur un stack
 		String cond = handleCondGen(accumulator.subList(1, accumulator.size()));
-		System.out.println("br i1 %"+cond+", label %"+label);
+		print("br i1 "+cond+", label %"+label);
 	}
  
 }
