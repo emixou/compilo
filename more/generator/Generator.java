@@ -173,7 +173,7 @@ public class Generator {
 		else if (value.equals("do")) loopGen(); 
 		else if (value.equals("then")) ifGen();
 		//else if (value.equals("else")) elseGen();
-		//else if (value.equals("od")) endLoopGen();
+		else if (value.equals("od")) endLoopGen();
 		//else if (value.equals("fi")) endCondGen();
 		else accumulator.add(aTerminal);
 	}
@@ -430,13 +430,11 @@ public class Generator {
 			Terminal tmp = accumulator.get(i);
 			if(tmp.getValue().equals("and") || tmp.getValue().equals("or")){
 				condList.add(tmpCond);
-				//tmpCond.clear();
 				tmpCond =  new ArrayList<Terminal>();
 				typeCond.add(tmp);
 			}else if(i == accumulator.size()-1){ // if last terminal
 				tmpCond.add(tmp);
 				condList.add(tmpCond);
-				//tmpCond.clear();
 				tmpCond =  new ArrayList<Terminal>();
 			}else{
 				tmpCond.add(tmp);
@@ -503,10 +501,25 @@ public class Generator {
 				}
 			}
 		}
-
+		
+		String label = newCondLabel();
+		pushLabel("cond"+loopValue);
+		
+		//Condition
+		print(label+":");
+		
+		ArrayList<Terminal> cond = new ArrayList<Terminal>();
+		Terminal lower = new Terminal("<");
+		
+		cond.addAll(exprValue);
+		cond.add(lower);
+		cond.addAll(endValue);
+		
+		print("br i1 "+handleCondGen(cond)+", label %loop"+loopValue+", label %afterLoop"+loopValue);
 
 		//LOOP MAIN
 		print("loop"+loopValue+":");
+		handleExprArithGen(exprValue);
 	}
 	
 // ################### CONDITIONS ###################	
