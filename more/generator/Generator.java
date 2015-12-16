@@ -450,7 +450,7 @@ public class Generator {
 			pushLabel("cond"+loopValue);
 		
 			//Condition
-			print(handleCondInstGen(accumulator.subList( (i*4)+1, (i*4)+4) ));
+			print(handleCondGen(accumulator.subList( (i*4)+1, (i*4)+4) ));
 			if(i < (condNbr-1) && condNbr > 1){
 				print("\tbr i1 %result, label %cond_"+(condId+1)+", label afterLoop"+loopValue);
 			}else{
