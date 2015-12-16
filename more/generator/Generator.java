@@ -228,7 +228,7 @@ public class Generator {
 		} else if (accumulator.get(0).equals("print")) {
 			handlePrintInstGen();
 		} else if (accumulator.get(0).equals(":=")) {
-			//handleAssignInstGen();
+			handleAssignInstGen();
 		}
 		
 		accumulator.clear();
@@ -380,7 +380,9 @@ public class Generator {
 	private void handleWhileInstGen(){
 		String loopValue = newLoopLabel() ; //getLoop(); must use newLoopLabel();
 		
-		int condNbr = (int) Math.ceil(accumulator.size()/4);
+		int rangeSize = 4;
+		
+		int condNbr = (int) Math.ceil(accumulator.size()/rangeSize);
 		
 		for(int i = 0; i < condNbr; ++i){
 			String condVarname = accumulator.get(i+1).getRealValue();
@@ -389,7 +391,7 @@ public class Generator {
 			pushLabel("cond"+loopValue);
 		
 			//Condition
-			print(handleCondInstGen(accumulator.subList( (i*4)+1, (i*4)+4) ));
+			print(handleCondInstGen(accumulator.subList( (i*rangeSize)+1, (i*rangeSize)+4) ));
 			if(i < (condNbr-1) && condNbr > 1){
 				print("\tbr i1 %result, label %cond_"+(condId+1)+", label afterLoop"+loopValue);
 			}else{
@@ -406,22 +408,13 @@ public class Generator {
 	private void handleForInstGen(){
 		String loopValue = newLoopLabel() ; //getLoop(); must use newLoopLabel();
 		
-		int condNbr = (int) Math.ceil(accumulator.size()/4);
+		int maxSize = 7;
+		int exprSize = accumulator.size() - maxSize;
+		Terminal variable = accumulator.get(1);
+		Terminal initValue = accumulator.get(3);
+		Terminal endValue = accumulator.get(accumulator.size()-1);
 		
-		for(int i = 0; i < condNbr; ++i){
-			String condVarname = accumulator.get(i+1).getRealValue();
-			String condCompvalue = accumulator.get(i+3).getRealValue();
-			
-			pushLabel("cond"+loopValue);
-		
-			//Condition
-			print(handleCondInstGen(accumulator.subList( (i*4)+1, (i*4)+4) ));
-			if(i < (condNbr-1) && condNbr > 1){
-				print("\tbr i1 %result, label %cond_"+(condId+1)+", label afterLoop"+loopValue);
-			}else{
-				print("\tbr i1 %result, label %loop"+loopValue+", label afterLoop"+loopValue);
-			}
-		}
+		List<Terminal> expr = accumulator.subList(5, 5+exprSize);
 		
 		//LOOP MAIN
 		print("loop"+loopValue+":");
