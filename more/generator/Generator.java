@@ -379,19 +379,23 @@ public class Generator {
 	
 	private void handleWhileInstGen(){
 		String loopValue = newLoopLabel() ; //getLoop(); must use newLoopLabel();
-		String condVarname = accumulator.get(1).getRealValue();
-		String condCompvalue = accumulator.get(3).getRealValue();
 		
+		int condNbr = (int) Math.ceil(accumulator.size()/4);
 		
-		pushLabel("cond"+loopValue);
+		for(int i = 0; i < condNbr; ++i){
+			String condVarname = accumulator.get(i+1).getRealValue();
+			String condCompvalue = accumulator.get(i+3).getRealValue();
+			
+			pushLabel("cond"+loopValue);
 		
-
-		// BEFORE LOOP
-		//print("\tbr label %cond"+loopValue); // jump to cond
-		
-		//Condition
-		print(handleCondInstGen(accumulator.subList(1, 4)));
-		print("\tbr i1 %result, label %loop"+loopValue+", label afterLoop"+loopValue);
+			//Condition
+			print(handleCondInstGen(accumulator.subList( (i*4)+1, (i*4)+4) ));
+			if(i < (condNbr-1) && condNbr > 1){
+				print("\tbr i1 %result, label %cond_"+(condId+1)+", label afterLoop"+loopValue);
+			}else{
+				print("\tbr i1 %result, label %loop"+loopValue+", label afterLoop"+loopValue);
+			}
+		}
 		
 		//LOOP MAIN
 		print("loop"+loopValue+":");
@@ -422,7 +426,7 @@ public class Generator {
 			condition+= "uge ";
 		}else if(comparator.equals(">")){
 			condition+= "ugt";
-		}else if(comparator.equals("==")){
+		}else if(comparator.equals("=")){
 			condition+= "eq";
 		}else{
 			condition+= "ne";
