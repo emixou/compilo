@@ -6,8 +6,8 @@
 <Assign> -> [VarName] := <ExprArith> 
 <ExprArith'> -> <Op'> <ExprArith> <ExprArith'> | eps
 <ExprArith> -> <ExprArith0> <ExprArith'>
-<ExprArith0'> ->  <Op''> <ExprArith> <ExprArith0'> | eps
-<ExprArith0> ->  <ExprArith1> <ExprArith0'>
+<ExprArith0'> -> <Op''> <ExprArith> <ExprArith0'> | eps
+<ExprArith0> -> <ExprArith1> <ExprArith0'>
 <ExprArith1> -> - <ExprArith> | [VarName] | [Number] | ( <ExprArith> )
 <Op'> -> + | -
 <Op''> -> * | /

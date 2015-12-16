@@ -16,6 +16,8 @@ public class Generator {
 	private int condId = 0;
 	private int loopId = 0;
 	
+	private static int identationLevel = 0;
+	
 	public Generator() {
 		accumulator = new ArrayList<Terminal>();
 		varnames = new ArrayList<String>();
@@ -32,6 +34,42 @@ public class Generator {
 		init();
 	}
 	
+	private void inlinePrint(String string, boolean first){
+		if(first){
+			for(int i=0; i<identationLevel; ++i){
+				System.out.print("\t");
+			}
+		}
+		System.out.print(string);
+	}
+	
+	private void inlinePrint(String string){
+		inlinePrint(string, false);
+	}
+	
+	private void print(String string, int identationLevel){
+		for(int i=0; i<identationLevel; ++i){
+			System.out.print("\t");
+		}
+		System.out.println(string);
+	}
+	
+	private void print(String string){
+		print(string, identationLevel);
+	}
+	
+	private void upIdentation(){
+		++identationLevel;
+	}
+	
+	private void downIdentation(){
+		if(identationLevel == 0){
+			identationLevel = 0;
+		}else{
+			--identationLevel;
+		}
+	}
+	
 	private String newTmpVar() {
 		++id;
 		return "%"+id;
@@ -44,11 +82,11 @@ public class Generator {
 	
 	private String newLoopLabel(){
 		++loopId;
-		return "_"+loopId+":";
+		return "_"+loopId;
 	}
 	
 	private void init() {
-		System.out.println(	"declare i32 @getchar()\n" +
+		print(	"declare i32 @getchar()\n" +
 							"declare i32 @putchar(i32)\n" +
 		
 							"define i32 @getint() {\n" +
@@ -134,44 +172,47 @@ public class Generator {
 // ################### CODE FORMATING ###################
 	
 	private void alloca(String varname) {
-		System.out.println("%"+varname+" = alloca i32");
+		print("%"+varname+" = alloca i32");
 	}
 	
 	private void store(String value, String varname) {
-		System.out.println("store i32 "+value+", i32* %"+varname);
+		print("store i32 "+value+", i32* %"+varname);
 	}
 	
 	private String load(String varname) {
 		String tmpVar = newTmpVar();
-		System.out.println(tmpVar+" = load i32, i32* %"+varname);
+		print(tmpVar+" = load i32, i32* %"+varname);
 		return tmpVar;
 	}
 	
 	private String op(String v1, String v2, String op) {
 		String tmpVar = newTmpVar();
-		System.out.print(tmpVar+" = ");
+		
+		inlinePrint(tmpVar+" = ", true);
 		if (op.equals("+")) {
-			System.out.print("add");
+			inlinePrint("add");
 		} else if (op.equals("-")) {
-			System.out.print("sub");
+			inlinePrint("sub");
 		} else if (op.equals("*")) {
-			System.out.print("mul");
+			inlinePrint("mul");
 		} else if (op.equals("/")) {
-			System.out.print("sdiv");
+			inlinePrint("sdiv");
 		}
-		System.out.println(" i32 "+v1+", "+v2);
+		print(" i32 "+v1+", "+v2, 0);
 		return tmpVar;
 	}
 	
 // ################### GENERAL ###################
 	
 	private void beginGen() {
-		System.out.println("define i32 @main() {");
+		print("define i32 @main() {");
+		upIdentation();
 	}
 	
 	private void endGen() {
-		System.out.println("ret i32 0");
-		System.out.println("}");
+		print("ret i32 0");
+		downIdentation();
+		print("}");
 	}
 
 // ################### INSTRUCTIONS ###################
@@ -203,7 +244,7 @@ public class Generator {
 	private void handlePrintInstGen() {
 		String varname = accumulator.get(2).getRealValue();
 		String tmpVar = load(varname);
-		System.out.println("call void @printlnint(i32 "+tmpVar+")");
+		print("call void @printlnint(i32 "+tmpVar+")");
 	}
 	
 	private void handleReadInstGen() {
@@ -213,7 +254,7 @@ public class Generator {
 			alloca(varname);
 		}
 		String tmpVar = newTmpVar();
-		System.out.println(tmpVar+" = call i32 @getint()");
+		print(tmpVar+" = call i32 @getint()");
 		store(tmpVar,varname);
 	}
 
@@ -300,6 +341,10 @@ public class Generator {
 // ################### LOOPS ###################	
 	
 	private void loopGen() {
+		if(jumpLabels.size() > 0){
+			upIdentation();
+			print("");
+		}
 		if (accumulator.get(0).equals("while")) {
 			handleWhileInstGen();
 		} else {
@@ -308,7 +353,15 @@ public class Generator {
 	}
 	
 	private void endLoopGen() {
-		System.out.println("\tbr label %"+popLabel());
+		String label = popLabel();
+		print("\tbr label %"+label);
+			
+		if(jumpLabels.size() != identationLevel-1){
+			downIdentation();
+			print("");
+		}
+		
+		print("afterLoop_"+ (label.split("_"))[1] +":");
 	}
 	
 	public void pushLabel(String label){
@@ -325,21 +378,23 @@ public class Generator {
 // ################### WHILE ###################	
 	
 	private void handleWhileInstGen(){
-		String loopValue = "poney" ; //getLoop(); must use newLoopLabel();
+		String loopValue = newLoopLabel() ; //getLoop(); must use newLoopLabel();
 		String condVarname = accumulator.get(1).getRealValue();
 		String condCompvalue = accumulator.get(3).getRealValue();
 		
+		
 		pushLabel("cond"+loopValue);
-			
-		System.out.println("\tbr label %cond"+loopValue); // jump to cond
 		
-		System.out.println(handleCondInstGen(accumulator.subList(1, 4)));
-		System.out.println("\tbr i1 %result, label %loop"+loopValue+", label afterLoop"+loopValue);
+
+		// BEFORE LOOP
+		//print("\tbr label %cond"+loopValue); // jump to cond
 		
-		System.out.println("afterLoop"+loopValue+":");
+		//Condition
+		print(handleCondInstGen(accumulator.subList(1, 4)));
+		print("\tbr i1 %result, label %loop"+loopValue+", label afterLoop"+loopValue);
 		
 		//LOOP MAIN
-		System.out.println("loop"+loopValue+":");
+		print("loop"+loopValue+":");
 	}
 
 // ################### CONDITIONS ###################	
@@ -356,7 +411,7 @@ public class Generator {
 			comparator = list.get(1).getValue();
 		}
 
-		System.out.println(newCondLabel()+":");
+		print(newCondLabel()+":");
 		condition = "\t%result icmp ";
 		
 		if(comparator.equals("<=")){
