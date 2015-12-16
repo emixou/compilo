@@ -519,9 +519,9 @@ public class Generator {
 	}
 	
 	private String simpleCondGen(List<Terminal> aSimpleCond) {
-		if (aSimpleCond.get(0).equals("not")) {
-			// voir ce quil faut faire
-			
+		if (aSimpleCond.get(0).equals("not")) { // v xor 1 => 1 xor 1 = 0 & 0 xor 1 = 1
+			String tmpVar = simpleCondGen(aSimpleCond.subList(1, aSimpleCond.size()));
+			return binOp(tmpVar,"1","xor");
 		}
 		int i = 0;
 		while (!comparators.contains(aSimpleCond.get(i))) ++i;
