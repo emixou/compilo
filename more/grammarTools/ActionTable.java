@@ -166,7 +166,7 @@ public class ActionTable {
 		//Induction : loop until stabilisation (no more changes)
 		boolean isStabilized;
 		
-		int i = 0;
+		//int i = 0;
 		
 		do{
 			isStabilized = true;
@@ -197,17 +197,19 @@ public class ActionTable {
 				}
 			}
 				
-			System.out.println("============== STEP "+i+" ===============");
+			/*System.out.println("============== STEP "+i+" ===============");
 			this.printFollow();			
 			System.out.println("=====================================\n");
-			++i;
+			++i;*/
 			
 		}while(!isStabilized);
 		
-		System.out.println("============== STEP "+i+" ===============");
+		follow.get(new Variable("<Program>")).add(new Terminal("eps"));
+		
+		/*System.out.println("============== STEP "+i+" ===============");
 		this.printFollow();			
 		System.out.println("=====================================\n");
-		++i;
+		++i;*/
 			
 	}
 	
