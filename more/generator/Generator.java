@@ -168,7 +168,7 @@ public class Generator {
 	public void generate(Terminal aTerminal) {
 		
 		String value = aTerminal.getValue();
-		if (value.equals(";")) instructionGen();
+		if (value.equals(";")) handleInstructionGen();
 		else if (value.equals("end")) endInstructionGen();
 		else if (value.equals("do")) loopGen(); 
 		else if (value.equals("then")) ifGen();
@@ -253,26 +253,29 @@ public class Generator {
 
 // ################### INSTRUCTIONS ###################
 	
-	public void instructionGen() {
-		if (accumulator.get(0).equals("begin")) {
-			beginGen();
-			accumulator.remove(0);
-		} 
-
-		if (accumulator.get(0).equals("read")) {
-			handleReadInstGen();
-		} else if (accumulator.get(0).equals("print")) {
-			handlePrintInstGen();
-		} else if (accumulator.get(0).equals(":=")) {
-			handleAssignInstGen();
+	public void handleInstructionGen() {
+		if (accumulator.size()>0) {
+			if (accumulator.get(0).equals("begin")) {
+				beginGen();
+				accumulator.remove(0);
+			} 
+	
+			if (accumulator.get(0).equals("read")) {
+				handleReadInstGen();
+			} else if (accumulator.get(0).equals("print")) {
+				handlePrintInstGen();
+			} else if (accumulator.get(1).equals(":=")) {
+				handleAssignInstGen();
+			} // else throw; TODO generator error
+			
+			accumulator.clear();
 		}
-		
-		accumulator.clear();
 	}
 	
 	private void endInstructionGen() {
-		instructionGen();
+		handleInstructionGen();
 		endGen();
+		accumulator.clear();
 	}
 	
 // ################### READ & WRITE ###################
@@ -391,18 +394,18 @@ public class Generator {
 		} else {
 			handleForInstGen();
 		}
+		accumulator.clear();
 	}
 	
 	private void endLoopGen() {
-		String label = popLabel();
-		print("\tbr label %"+label);
-			
+		handleInstructionGen();
+		String loopLabel = popLabel();
+		print("\tbr label %cond"+loopLabel);	
 		if(jumpLabels.size() != identationLevel-1){
 			downIdentation();
 			print("");
 		}
-		
-		print("afterLoop_"+ (label.split("_"))[1] +":");
+		print("after"+loopLabel+":");
 	}
 	
 	public void pushLabel(String label){
@@ -419,55 +422,13 @@ public class Generator {
 // ################### WHILE ###################	
 	
 	private void handleWhileInstGen(){
-		String loopValue = newLoopLabel();
-	
-		ArrayList<Terminal> typeCond = new ArrayList<Terminal>();
-		ArrayList<ArrayList<Terminal>> condList = new ArrayList<ArrayList<Terminal>>();
-		ArrayList<Terminal> tmpCond = new ArrayList<Terminal>();
-		
-		for(int i = 1; i < accumulator.size(); ++i){
-			Terminal tmp = accumulator.get(i);
-			if(tmp.getValue().equals("and") || tmp.getValue().equals("or")){
-				condList.add(tmpCond);
-				tmpCond =  new ArrayList<Terminal>();
-				typeCond.add(tmp);
-			}else if(i == accumulator.size()-1){ // if last terminal
-				tmpCond.add(tmp);
-				condList.add(tmpCond);
-				tmpCond =  new ArrayList<Terminal>();
-			}else{
-				tmpCond.add(tmp);
-			}
-		}
-		
-		int condNbr = condList.size();
-		
-		for(int i = 0; i < condList.size(); ++i){
-
-			String label = newCondLabel();
-			tmpCond = condList.get(i);
-			
-			/*
-			 * String condVarname = tmpCond.get(0).getRealValue();
-			 * String condCompvalue = tmpCond.get(2).getRealValue();
-			 */
-			
-			pushLabel("cond"+loopValue);
-		
-			//Condition
-			if(i < (condNbr-1) && condNbr > 1){
-				print("cond_"+(condId)+":");
-				print("br i1 "+handleCondGen(tmpCond)+", label %cond_"+(condId+1)+", label %afterLoop"+loopValue);
-			}else{
-				if(i == (condNbr-1) && (condNbr != 1)){
-					print("cond_"+(condId)+":");
-				}
-				print("br i1 "+handleCondGen(tmpCond)+", label %loop"+loopValue+", label %afterLoop"+loopValue);
-			}
-		}
-		
-		//LOOP MAIN
-		print("loop"+loopValue+":");
+		String loopLabel = newLoopLabel();
+		pushLabel(loopLabel);
+		System.out.println("br label %cond"+loopLabel);
+		System.out.println("cond"+loopLabel+":");
+		String condVar = handleCondGen(accumulator.subList(1, accumulator.size()));
+		print("br i1 "+condVar+", label %body"+loopLabel+", label %after"+loopLabel);
+		System.out.println("body"+loopLabel+":");
 	}
 
 // ################### FOR ###################	
@@ -589,6 +550,7 @@ public class Generator {
 		// ajouter le label sur un stack
 		String cond = handleCondGen(accumulator.subList(1, accumulator.size()));
 		print("br i1 "+cond+", label %"+label);
+		accumulator.clear();
 	}
  
 }
