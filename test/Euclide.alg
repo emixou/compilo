@@ -18,5 +18,10 @@ begin
     b := a ;
     a := c
   od ;
-  print(a)
+  print(a);
+  
+  for a from 0 by a+1 to 10 do 
+	b := b +1
+  od
+  
 end

@@ -262,8 +262,8 @@ public class Generator {
 			handleReadInstGen();
 		} else if (accumulator.get(0).equals("print")) {
 			handlePrintInstGen();
-		} else {
-			handleAssignInstGen();
+		} else if (accumulator.get(0).equals(":=")) {
+			//handleAssignInstGen();
 		}
 		
 		accumulator.clear();
@@ -383,7 +383,7 @@ public class Generator {
 		if (accumulator.get(0).equals("while")) {
 			handleWhileInstGen();
 		} else {
-			//handleForInstGen();
+			handleForInstGen();
 		}
 	}
 	
@@ -436,6 +436,32 @@ public class Generator {
 		print("loop"+loopValue+":");
 	}
 
+// ################### FOR ###################	
+	
+	private void handleForInstGen(){
+		String loopValue = newLoopLabel() ; //getLoop(); must use newLoopLabel();
+		
+		int condNbr = (int) Math.ceil(accumulator.size()/4);
+		
+		for(int i = 0; i < condNbr; ++i){
+			String condVarname = accumulator.get(i+1).getRealValue();
+			String condCompvalue = accumulator.get(i+3).getRealValue();
+			
+			pushLabel("cond"+loopValue);
+		
+			//Condition
+			print(handleCondInstGen(accumulator.subList( (i*4)+1, (i*4)+4) ));
+			if(i < (condNbr-1) && condNbr > 1){
+				print("\tbr i1 %result, label %cond_"+(condId+1)+", label afterLoop"+loopValue);
+			}else{
+				print("\tbr i1 %result, label %loop"+loopValue+", label afterLoop"+loopValue);
+			}
+		}
+		
+		//LOOP MAIN
+		print("loop"+loopValue+":");
+	}
+	
 // ################### CONDITIONS ###################	
 	
 	private String decomposeCond(List<Terminal> aCond, int prev, int curr, String intermediate) {
