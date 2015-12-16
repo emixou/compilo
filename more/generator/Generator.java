@@ -219,21 +219,21 @@ public class Generator {
 	
 	private String icmp(String v1, String v2, String comparator) {
 		String tmpVar = newTmpVar();
-		inlinePrint(tmpVar+" = icmp ");
+		System.out.print(tmpVar+" = icmp ");
 		if(comparator.equals("<=")) {
-			inlinePrint("ule");
+			System.out.print("ule");
 		} else if(comparator.equals("<")) {
-			inlinePrint("ult");
+			System.out.print("ult");
 		} else if(comparator.equals(">=")) {
-			inlinePrint("uge");
+			System.out.print("uge");
 		} else if(comparator.equals(">")) {
-			inlinePrint("ugt");
+			System.out.print("ugt");
 		} else if(comparator.equals("=")) {
-			inlinePrint("eq");
+			System.out.print("eq");
 		} else {
-			inlinePrint("ne");
+			System.out.print("ne");
 		}
-		print(" i32 "+v1+", "+v2);
+		System.out.println(" i32 "+v1+", "+v2);
 		return tmpVar;
 	}
 	
