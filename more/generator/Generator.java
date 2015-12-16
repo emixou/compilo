@@ -39,7 +39,7 @@ public class Generator {
 	
 	private String newCondLabel(){
 		++condId;
-		return "cond_"+condId+":";
+		return "cond_"+condId;
 	}
 	
 	private String newLoopLabel(){
@@ -124,9 +124,9 @@ public class Generator {
 		if (value.equals(";")) instructionGen();
 		else if (value.equals("end")) endInstructionGen();
 		else if (value.equals("do")) loopGen(); 
-		//else if (value.equals("then")) condGen();
+		else if (value.equals("then")) ifGen();
 		//else if (value.equals("else")) elseGen();
-		else if (value.equals("od")) endLoopGen();
+		//else if (value.equals("od")) endLoopGen();
 		//else if (value.equals("fi")) endCondGen();
 		else accumulator.add(aTerminal);
 	}
@@ -241,7 +241,7 @@ public class Generator {
 		} if (anExprArith.size()==2) {
 			String val = handleExprArithGen(anExprArith.subList(1, anExprArith.size()));
 			return op("0",val,"-");
-		} else { // a + ( - b * 2 + 5 ) - 3 
+		} else { 
 			// <ExprArith> +|- <ExprArith> +|- ...
 			String res = opExprArithDecomp(anExprArith, opLvl2);
 			if (res!=null) return res;
@@ -333,7 +333,7 @@ public class Generator {
 			
 		System.out.println("\tbr label %cond"+loopValue); // jump to cond
 		
-		System.out.println(handleIfInstGen(accumulator.subList(1, 4)));
+		System.out.println(handleCondInstGen(accumulator.subList(1, 4)));
 		System.out.println("\tbr i1 %result, label %loop"+loopValue+", label afterLoop"+loopValue);
 		
 		System.out.println("afterLoop"+loopValue+":");
@@ -344,14 +344,8 @@ public class Generator {
 
 // ################### CONDITIONS ###################	
 	
-	//Call from trigger method
-	private void handleIfInstGen(){
-		
-		handleIfInstGen(null);
-	}
-	
 	//Call from handle method
-	private String handleIfInstGen(List<Terminal> list){
+	private String handleCondInstGen(List<Terminal> list){
 
 		String comparator;
 		String condition;
@@ -390,5 +384,14 @@ public class Generator {
 		return condition;
 		
 	}
-
+	
+// ################### IF ###################	
+	
+	private void ifGen() {
+		String label = newCondLabel();
+		// ajouter le label sur un stack
+		String cond = handleCondInstGen(accumulator.subList(1, accumulator.size()));
+		System.out.println("br i1 %"+cond+", label %"+label);
+	}
+ 
 }

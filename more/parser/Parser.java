@@ -50,6 +50,7 @@ public class Parser {
 				produce(aRule);
 				top = stack.pop();
 			} else {
+				System.out.println(top.getValue());
 				error(symbol);
 				break;
 			}
