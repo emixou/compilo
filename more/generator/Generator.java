@@ -14,8 +14,7 @@ public class Generator {
 	private ArrayList<Terminal> comparators;
 	
 	private int id = 0;
-	private int condId = 0;
-	private int loopId = 0;
+	private int labelId = 0;
 	
 	private static int identationLevel = 0;
 	
@@ -84,14 +83,9 @@ public class Generator {
 		return "%"+id;
 	}
 	
-	private String newCondLabel(){
-		++condId;
-		return "cond_"+condId;
-	}
-	
-	private String newLoopLabel(){
-		++loopId;
-		return "_"+loopId;
+	private String newLabel(){
+		++labelId;
+		return "_"+labelId;
 	}
 	
 	private void init() {
@@ -169,12 +163,13 @@ public class Generator {
 		
 		String value = aTerminal.getValue();
 		if (value.equals(";")) handleInstructionGen();
+		else if (value.equals("begin")) beginGen();
 		else if (value.equals("end")) endInstructionGen();
 		else if (value.equals("do")) loopGen(); 
 		else if (value.equals("then")) ifGen();
-		//else if (value.equals("else")) elseGen();
+		else if (value.equals("else")) elseGen();
 		else if (value.equals("od")) endLoopGen();
-		//else if (value.equals("fi")) endCondGen();
+		else if (value.equals("fi")) endCondGen();
 		else accumulator.add(aTerminal);
 	}
 
@@ -255,10 +250,6 @@ public class Generator {
 	
 	public void handleInstructionGen() {
 		if (accumulator.size()>0) {
-			if (accumulator.get(0).equals("begin")) {
-				beginGen();
-				accumulator.remove(0);
-			} 
 	
 			if (accumulator.get(0).equals("read")) {
 				handleReadInstGen();
@@ -400,7 +391,7 @@ public class Generator {
 	private void endLoopGen() {
 		handleInstructionGen();
 		String loopLabel = popLabel();
-		print("\tbr label %cond"+loopLabel);	
+		print("\tbr label %head"+loopLabel);	
 		if(jumpLabels.size() != identationLevel-1){
 			downIdentation();
 			print("");
@@ -422,10 +413,10 @@ public class Generator {
 // ################### WHILE ###################	
 	
 	private void handleWhileInstGen(){
-		String loopLabel = newLoopLabel();
+		String loopLabel = newLabel();
 		pushLabel(loopLabel);
-		System.out.println("br label %cond"+loopLabel);
-		System.out.println("cond"+loopLabel+":");
+		System.out.println("br label %head"+loopLabel);
+		System.out.println("head"+loopLabel+":");
 		String condVar = handleCondGen(accumulator.subList(1, accumulator.size()));
 		print("br i1 "+condVar+", label %body"+loopLabel+", label %after"+loopLabel);
 		System.out.println("body"+loopLabel+":");
@@ -434,7 +425,7 @@ public class Generator {
 // ################### FOR ###################	
 	
 	private void handleForInstGen(){
-		String loopValue = newLoopLabel() ; //getLoop(); must use newLoopLabel();
+		String loopValue = newLabel(); //getLoop(); must use newLoopLabel();
 		
 		int maxSize = 7;
 		int exprSize = accumulator.size() - maxSize;
@@ -464,13 +455,18 @@ public class Generator {
 		
 		//Before loop
 
-		handleExprArithGen(initValue);
+		if (!varnames.contains(variable.getRealValue())) {
+			alloca(variable.getRealValue());
+		}
+		String tmpVar = handleExprArithGen(initValue);
+		store(tmpVar, variable.getRealValue());
 		
-		String label = newCondLabel();
-		pushLabel("cond"+loopValue);
+		String label = newLabel();
+		pushLabel(label);
 		
 		//Condition
-		print(label+":");
+		print("br label %head"+label);
+		print("head"+label+":");
 		
 		ArrayList<Terminal> cond = new ArrayList<Terminal>();
 		Terminal lower = new Terminal("<");
@@ -478,12 +474,15 @@ public class Generator {
 		cond.addAll(exprValue);
 		cond.add(lower);
 		cond.addAll(endValue);
+
+		String compVar = handleCondGen(cond);
+		store(handleExprArithGen(exprValue), variable.getRealValue()); //Incrementation
 		
-		print("br i1 "+handleCondGen(cond)+", label %loop"+loopValue+", label %afterLoop"+loopValue);
+		print("br i1 "+compVar+", label %body"+label+", label %after"+label);
 
 		//LOOP MAIN
-		print("loop"+loopValue+":");
-		handleExprArithGen(exprValue);
+		print("body"+label+":");
+		
 	}
 	
 // ################### CONDITIONS ###################	
@@ -546,11 +545,32 @@ public class Generator {
 // ################### IF ###################	
 	
 	private void ifGen() {
-		String label = newCondLabel();
-		// ajouter le label sur un stack
+		String label = newLabel();
+		pushLabel(label);
 		String cond = handleCondGen(accumulator.subList(1, accumulator.size()));
-		print("br i1 "+cond+", label %"+label);
+		System.out.println("br i1 "+cond+", label %body"+label+", label %else"+label);
 		accumulator.clear();
+		System.out.println("body"+label+":");
+	}
+	
+	private void elseGen() {
+		handleInstructionGen();
+		String label = popLabel();
+		System.out.println("br label %after"+label);
+		System.out.println("else"+label+":");
+		pushLabel(label);
+		pushLabel(null);
+	}
+	
+	private void endCondGen() {
+		handleInstructionGen();
+		String label = popLabel();
+		if (label!=null) {
+			System.out.println("br label %after"+label);
+			System.out.println("else"+label+":");
+		} else label = popLabel();
+		System.out.println("br label %after"+label);
+		System.out.println("after"+label+":");
 	}
  
 }
