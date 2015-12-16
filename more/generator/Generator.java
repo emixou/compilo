@@ -42,28 +42,10 @@ public class Generator {
 		init();
 	}
 	
-	private void inlinePrint(String string, boolean first){
-		if(first){
-			for(int i=0; i<identationLevel; ++i){
-				System.out.print("\t");
-			}
-		}
-		System.out.print(string);
-	}
-	
-	private void inlinePrint(String string){
-		inlinePrint(string, false);
-	}
-	
-	private void print(String string, int identationLevel){
+	private void indent(){
 		for(int i=0; i<identationLevel; ++i){
 			System.out.print("\t");
 		}
-		System.out.println(string);
-	}
-	
-	private void print(String string){
-		print(string, identationLevel);
 	}
 	
 	private void upIdentation(){
@@ -71,11 +53,7 @@ public class Generator {
 	}
 	
 	private void downIdentation(){
-		if(identationLevel == 0){
-			identationLevel = 0;
-		}else{
-			--identationLevel;
-		}
+		--identationLevel;
 	}
 	
 	private String newTmpVar() {
@@ -89,7 +67,7 @@ public class Generator {
 	}
 	
 	private void init() {
-		print(	"declare i32 @getchar()\n" +
+		System.out.println(	"declare i32 @getchar()\n" +
 							"declare i32 @putchar(i32)\n" +
 		
 							"define i32 @getint() {\n" +
@@ -176,46 +154,52 @@ public class Generator {
 // ################### CODE FORMATING ###################
 	
 	private void alloca(String varname) {
-		print("%"+varname+" = alloca i32");
+		indent();
+		System.out.println("\t%"+varname+" = alloca i32");
 	}
 	
 	private void store(String value, String varname) {
-		print("store i32 "+value+", i32* %"+varname);
+		indent();
+		System.out.println("\tstore i32 "+value+", i32* %"+varname);
 	}
 	
 	private String load(String varname) {
 		String tmpVar = newTmpVar();
-		print(tmpVar+" = load i32, i32* %"+varname);
+		indent();
+		System.out.println("\t"+tmpVar+" = load i32, i32* %"+varname);
 		return tmpVar;
 	}
 	
 	private String op(String v1, String v2, String op) {
 		String tmpVar = newTmpVar();
 		
-		inlinePrint(tmpVar+" = ", true);
+		indent();
+		System.out.print("\t"+tmpVar+" = ");
 		if (op.equals("+")) {
-			inlinePrint("add");
+			System.out.print("add");
 		} else if (op.equals("-")) {
-			inlinePrint("sub");
+			System.out.print("sub");
 		} else if (op.equals("*")) {
-			inlinePrint("mul");
+			System.out.print("mul");
 		} else if (op.equals("/")) {
-			inlinePrint("sdiv");
+			System.out.print("sdiv");
 		}
-		print(" i32 "+v1+", "+v2, 0);
+		
+		System.out.println(" i32 "+v1+", "+v2);
 		return tmpVar;
 	}
 	
 	private String binOp(String v1, String v2, String binOp) {
 		String tmpVar = newTmpVar();
-		print(tmpVar+" = "+binOp+" i1 "+v1+", "+v2, 0);
+		indent();
+		System.out.println("\t"+tmpVar+" = "+binOp+" i1 "+v1+", "+v2);
 		return tmpVar;
 	}
 	
 	private String icmp(String v1, String v2, String comparator) {
 		String tmpVar = newTmpVar();
-		print("");
-		inlinePrint(tmpVar+" = icmp ", true);
+		indent();
+		System.out.print("\t"+tmpVar+" = icmp ");
 		if(comparator.equals("<=")) {
 			System.out.print("ule");
 		} else if(comparator.equals("<")) {
@@ -229,28 +213,40 @@ public class Generator {
 		} else {
 			System.out.print("ne");
 		}
-		print(" i32 "+v1+", "+v2, 0);
+		System.out.println(" i32 "+v1+", "+v2);
 		return tmpVar;
+	}
+	
+	private void br(String label) {
+		indent();
+		System.out.println("\tbr label %"+label);
+	}
+	
+	private void br(String condVar, String label, String elseLabel) {
+		indent();
+		System.out.println("\tbr i1 "+condVar+", label %"+label+", label %"+elseLabel);
+	}
+	
+	private void label(String label) {
+		indent();
+		System.out.println(label+":");
 	}
 	
 // ################### GENERAL ###################
 	
 	private void beginGen() {
-		print("define i32 @main() {");
-		upIdentation();
+		System.out.println("define i32 @main() {");
 	}
 	
 	private void endGen() {
-		print("ret i32 0");
-		downIdentation();
-		print("}");
+		System.out.println("\tret i32 0");
+		System.out.println("}");
 	}
 
 // ################### INSTRUCTIONS ###################
 	
 	public void handleInstructionGen() {
 		if (accumulator.size()>0) {
-	
 			if (accumulator.get(0).equals("read")) {
 				handleReadInstGen();
 			} else if (accumulator.get(0).equals("print")) {
@@ -274,7 +270,8 @@ public class Generator {
 	private void handlePrintInstGen() {
 		String varname = accumulator.get(2).getRealValue();
 		String tmpVar = load(varname);
-		print("call void @printlnint(i32 "+tmpVar+")");
+		indent();
+		System.out.println("\tcall void @printlnint(i32 "+tmpVar+")");
 	}
 	
 	private void handleReadInstGen() {
@@ -284,7 +281,8 @@ public class Generator {
 			alloca(varname);
 		}
 		String tmpVar = newTmpVar();
-		print(tmpVar+" = call i32 @getint()");
+		indent();
+		System.out.println("\t"+tmpVar+" = call i32 @getint()");
 		store(tmpVar,varname);
 	}
 
@@ -294,7 +292,6 @@ public class Generator {
 		String varname = accumulator.get(0).getRealValue();
 		String tmpVar = handleExprArithGen(accumulator.subList(2, accumulator.size()));
 		handleAssignInstGen(varname, tmpVar);
-		
 	}
 	
 	private void handleAssignInstGen(String varname, String tmpVar) {
@@ -376,10 +373,6 @@ public class Generator {
 // ################### LOOPS ###################	
 	
 	private void loopGen() {
-		if(jumpLabels.size() > 0){
-			upIdentation();
-			print("");
-		}
 		if (accumulator.get(0).equals("while")) {
 			handleWhileInstGen();
 		} else {
@@ -391,12 +384,9 @@ public class Generator {
 	private void endLoopGen() {
 		handleInstructionGen();
 		String loopLabel = popLabel();
-		print("\tbr label %head"+loopLabel);	
-		if(jumpLabels.size() != identationLevel-1){
-			downIdentation();
-			print("");
-		}
-		print("after"+loopLabel+":");
+		br("head"+loopLabel);
+		label("after"+loopLabel);
+		downIdentation();
 	}
 	
 	public void pushLabel(String label){
@@ -415,11 +405,12 @@ public class Generator {
 	private void handleWhileInstGen(){
 		String loopLabel = newLabel();
 		pushLabel(loopLabel);
-		System.out.println("br label %head"+loopLabel);
-		System.out.println("head"+loopLabel+":");
+		br("head"+loopLabel);
+		upIdentation();
+		label("head"+loopLabel);
 		String condVar = handleCondGen(accumulator.subList(1, accumulator.size()));
-		print("br i1 "+condVar+", label %body"+loopLabel+", label %after"+loopLabel);
-		System.out.println("body"+loopLabel+":");
+		br(condVar,"body"+loopLabel,"after"+loopLabel);
+		label("body"+loopLabel);
 	}
 
 // ################### FOR ###################	
@@ -444,22 +435,23 @@ public class Generator {
 		String by = handleExprArithGen(accumulator.subList(previous, i));
 		String to = handleExprArithGen(accumulator.subList(++i, accumulator.size()));
 		
-		System.out.println("br label %cond"+label);
+		br("cond"+label);
+		upIdentation();
 		
 		// Head
-		print("head"+label+":");
+		label("head"+label);
 		String tmpVar = op(load(varname.getRealValue()), by, "+");
 		store(tmpVar, varname.getRealValue()); 
 		
 		// Cond
-		print("br label %cond"+label);
-		print("cond"+label+":");
+		br("cond"+label);
+		label("cond"+label);
 		
 		tmpVar = icmp(load(varname.getRealValue()), to,"<");
-		print("br i1 "+tmpVar+", label %body"+label+", label %after"+label);
+		br(tmpVar,"body"+label,"after"+label);
 		
 		// Body
-		print("body"+label+":");
+		label("body"+label);
 		
 	}
 	
@@ -526,16 +518,17 @@ public class Generator {
 		String label = newLabel();
 		pushLabel(label);
 		String cond = handleCondGen(accumulator.subList(1, accumulator.size()));
-		System.out.println("br i1 "+cond+", label %body"+label+", label %else"+label);
+		br(cond,"body"+label,"else"+label);
+		upIdentation();
+		label("body"+label);
 		accumulator.clear();
-		System.out.println("body"+label+":");
 	}
 	
 	private void elseGen() {
 		handleInstructionGen();
 		String label = popLabel();
-		System.out.println("br label %after"+label);
-		System.out.println("else"+label+":");
+		br("after"+label);
+		label("else"+label);
 		pushLabel(label);
 		pushLabel(null);
 	}
@@ -544,11 +537,12 @@ public class Generator {
 		handleInstructionGen();
 		String label = popLabel();
 		if (label!=null) {
-			System.out.println("br label %after"+label);
-			System.out.println("else"+label+":");
+			br("after"+label);
+			label("else"+label);
 		} else label = popLabel();
-		System.out.println("br label %after"+label);
-		System.out.println("after"+label+":");
+		br("after"+label);
+		label("after"+label);
+		downIdentation();
 	}
  
 }
