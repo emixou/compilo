@@ -502,6 +502,10 @@ public class Generator {
 			}
 		}
 		
+		//Before loop
+
+		handleExprArithGen(initValue);
+		
 		String label = newCondLabel();
 		pushLabel("cond"+loopValue);
 		
