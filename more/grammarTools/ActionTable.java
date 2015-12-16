@@ -166,83 +166,48 @@ public class ActionTable {
 		//Induction : loop until stabilisation (no more changes)
 		boolean isStabilized;
 		
-		//int i = 0;
+		int i = 0;
 		
 		do{
 			isStabilized = true;
 			
-			for(Variable aVariable : grammar.getVariables()){
-				for(ProductionRule aRule : grammar.getProductionRule((Token) aVariable)){			
-					ArrayList<Token> rightPart = aRule.getRightSide();
-						
-						int id = aRule.getRightSide().indexOf(aVariable);
-						
-						HashSet<Token> tokenSetFirst = new HashSet<Token>();
-						
-						ArrayList<Token> remainingTerminals = new ArrayList<Token>(rightPart.subList(id+1, rightPart.size()));					
-						for(Token terminal : remainingTerminals){
-							for(Token aToken : first.get(terminal.getValue())){
-								//Follow B
-								tokenSetFirst.add(aToken);
-							}
-						}
-						
-						HashSet<Token> tokenSetFollow = new HashSet<Token>();
-						//Follow A
-						tokenSetFollow.addAll(follow.get(aRule.getLeftSide().getValue()));
-						
-						HashSet<Token> finalTokenSet = new HashSet<Token>();
-						
-						if(tokenSetFollow.isEmpty()){
-							finalTokenSet.addAll(tokenSetFirst);
-						}else if(tokenSetFirst.isEmpty()){
-							finalTokenSet.addAll(tokenSetFollow);
-						}else if(!tokenSetFollow.isEmpty() && !tokenSetFirst.isEmpty()){
-							for(Token tokenFirst : tokenSetFirst){
-								for(Token tokenFollow : tokenSetFollow){
-									//Follow will already add first
-									if(tokenFirst.equals(epsilon)){
-										finalTokenSet.add(tokenFollow);
-									}else{
-										finalTokenSet.add(tokenFirst);
-									}
-								}
-							}
-						}
-						
-						if(finalTokenSet.contains(epsilon)){
-							finalTokenSet.remove(epsilon);
-						}
-						
-						for(Token aToken : finalTokenSet){
-							if(!follow.get(rightPart.get(id).getValue()).contains(aToken)){
-								follow.get(rightPart.get(id).getValue()).add(aToken);
+			for (ProductionRule aRule : grammar.getProductionRules()) {
+				for (int j=0; j<aRule.getRightSide().size()-1; ++j) {
+					Token aToken = aRule.getRightSide().get(j);
+					if (grammar.isVariable(aToken)) {
+						Token otherToken = aRule.getRightSide().get(j+1);
+						for (Token addedToken : first.get(otherToken)) {
+							if (!addedToken.equals("eps") && !follow.get(aToken).contains(addedToken)) {
+								follow.get(aToken).add(addedToken);
 								isStabilized = false;
 							}
 						}
-					
+					}
 				}
 				
+				for (Token aToken : aRule.getRightSide()) {
+					if (grammar.isVariable(aToken)) {
+						for (Token addedToken : follow.get(aRule.getLeftSide())) {
+							if (!addedToken.equals("eps") && !follow.get(aToken).contains(addedToken)) {
+								follow.get(aToken).add(addedToken);
+								isStabilized = false;
+							}
+						}
+					}
+				}
 			}
 				
-			/*System.out.println("============== STEP "+i+" ===============");
+			System.out.println("============== STEP "+i+" ===============");
 			this.printFollow();			
 			System.out.println("=====================================\n");
-			++i;*/
+			++i;
 			
 		}while(!isStabilized);
 		
-		
-		for(Variable aVariable : grammar.getVariables()){
-			if(follow.get(aVariable.getValue()).isEmpty()){
-				follow.get(aVariable.getValue()).add(epsilon);
-			}
-		}
-		
-		/*System.out.println("============== STEP "+i+" ===============");
+		System.out.println("============== STEP "+i+" ===============");
 		this.printFollow();			
 		System.out.println("=====================================\n");
-		++i;*/
+		++i;
 			
 	}
 	
