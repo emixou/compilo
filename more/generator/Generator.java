@@ -424,63 +424,41 @@ public class Generator {
 
 // ################### FOR ###################	
 	
-	private void handleForInstGen(){
-		String loopValue = newLabel(); //getLoop(); must use newLoopLabel();
-		
-		int maxSize = 7;
-		int exprSize = accumulator.size() - maxSize;
-		Terminal variable = accumulator.get(1);
-		ArrayList<Terminal> initValue = new ArrayList<Terminal>();
-		ArrayList<Terminal> endValue  = new ArrayList<Terminal>();
-		ArrayList<Terminal> exprValue = new ArrayList<Terminal>();
-			
-		int byPos = -1;
-		int toPos = -1;
-		
-		for(int i = 3; i < accumulator.size(); ++i){
-			if(accumulator.get(i).equals("by")){
-				byPos = i;
-			}else if(accumulator.get(i).equals("to")){
-				toPos = i;
-			}else{
-				if(toPos != -1 && byPos != -1){
-					endValue.add(accumulator.get(i));
-				}else if(byPos != -1 && toPos == -1){
-					exprValue.add(accumulator.get(i));
-				}else{
-					initValue.add(accumulator.get(i));
-				}
-			}
-		}
-		
-		//Before loop
-
-		if (!varnames.contains(variable.getRealValue())) {
-			alloca(variable.getRealValue());
-		}
-		String tmpVar = handleExprArithGen(initValue);
-		store(tmpVar, variable.getRealValue());
-		
+	private void handleForInstGen()  {
+		// for [VarName] from <ExprArith> by <ExprArith> to <ExprArith> do <Code> od
+		Terminal varname = accumulator.get(1);
 		String label = newLabel();
 		pushLabel(label);
 		
-		//Condition
-		print("br label %head"+label);
+		//init
+		int i = 3;
+		while (!accumulator.get(i).equals("by")) ++i;
+		String from = handleExprArithGen(accumulator.subList(3, i));
+		if (!varnames.contains(varname.getRealValue())) {
+			alloca(varname.getRealValue());
+		}
+		store(from, varname.getRealValue());
+		
+		int previous = ++i;
+		while (!accumulator.get(i).equals("to")) ++i;
+		String by = handleExprArithGen(accumulator.subList(previous, i));
+		String to = handleExprArithGen(accumulator.subList(++i, accumulator.size()));
+		
+		System.out.println("br label %cond"+label);
+		
+		// Head
 		print("head"+label+":");
+		String tmpVar = op(load(varname.getRealValue()), by, "+");
+		store(tmpVar, varname.getRealValue()); 
 		
-		ArrayList<Terminal> cond = new ArrayList<Terminal>();
-		Terminal lower = new Terminal("<");
+		// Cond
+		print("br label %cond"+label);
+		print("cond"+label+":");
 		
-		cond.addAll(exprValue);
-		cond.add(lower);
-		cond.addAll(endValue);
-
-		String compVar = handleCondGen(cond);
-		store(handleExprArithGen(exprValue), variable.getRealValue()); //Incrementation
+		tmpVar = icmp(load(varname.getRealValue()), to,"<");
+		print("br i1 "+tmpVar+", label %body"+label+", label %after"+label);
 		
-		print("br i1 "+compVar+", label %body"+label+", label %after"+label);
-
-		//LOOP MAIN
+		// Body
 		print("body"+label+":");
 		
 	}
@@ -542,7 +520,7 @@ public class Generator {
 		return simpleCondGen(aCond);
 	}
 	
-// ################### IF ###################	
+// ################### IF ELSE FI ###################	
 	
 	private void ifGen() {
 		String label = newLabel();
