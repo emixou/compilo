@@ -66,6 +66,16 @@ public class Generator {
 		return "_"+labelId;
 	}
 	
+	private void pushLabel(String label){
+		jumpLabels.add(label);
+	}
+	
+	private String popLabel(){
+		String tmp = jumpLabels.get(jumpLabels.size()-1);
+		jumpLabels.remove(jumpLabels.size()-1);
+		return tmp;
+	}
+	
 	private void init() {
 		System.out.println(	"declare i32 @getchar()\n" +
 							"declare i32 @putchar(i32)\n" +
@@ -245,7 +255,7 @@ public class Generator {
 
 // ################### INSTRUCTIONS ###################
 	
-	public void handleInstructionGen() {
+	private void handleInstructionGen() {
 		if (accumulator.size()>0) {
 			if (accumulator.get(0).equals("read")) {
 				handleReadInstGen();
@@ -253,7 +263,7 @@ public class Generator {
 				handlePrintInstGen();
 			} else if (accumulator.get(1).equals(":=")) {
 				handleAssignInstGen();
-			} // else throw; TODO generator error
+			}
 			
 			accumulator.clear();
 		}
@@ -388,17 +398,6 @@ public class Generator {
 		label("after"+loopLabel);
 		downIdentation();
 	}
-	
-	public void pushLabel(String label){
-		jumpLabels.add(label);
-	}
-	
-	private String popLabel(){
-		String tmp = jumpLabels.get(jumpLabels.size()-1);
-		jumpLabels.remove(jumpLabels.size()-1);
-		return tmp;
-	}
-
 
 // ################### WHILE ###################	
 	
