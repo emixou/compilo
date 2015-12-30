@@ -172,7 +172,8 @@ public class ActionTable {
 			isStabilized = true;
 			
 			for (ProductionRule aRule : grammar.getProductionRules()) {
-				for (int j=0; j<aRule.getRightSide().size()-1; ++j) {
+				int j;
+				for (j=0; j<aRule.getRightSide().size()-1; ++j) {
 					Token aToken = aRule.getRightSide().get(j);
 					if (grammar.isVariable(aToken)) {
 						Token otherToken = aRule.getRightSide().get(j+1);
@@ -184,14 +185,13 @@ public class ActionTable {
 						}
 					}
 				}
-				
-				for (Token aToken : aRule.getRightSide()) {
-					if (grammar.isVariable(aToken)) {
-						for (Token addedToken : follow.get(aRule.getLeftSide())) {
-							if (!addedToken.equals("eps") && !follow.get(aToken).contains(addedToken)) {
-								follow.get(aToken).add(addedToken);
-								isStabilized = false;
-							}
+
+				Token aToken = aRule.getRightSide().get(j);
+				if (grammar.isVariable(aToken)) {
+					for (Token addedToken : follow.get(aRule.getLeftSide())) {
+						if (!addedToken.equals("eps") && !follow.get(aToken).contains(addedToken)) {
+							follow.get(aToken).add(addedToken);
+							isStabilized = false;
 						}
 					}
 				}
